@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { UsersService } from '../users/users.service'
 import { SessionsService } from '../sessions/sessions.service'
+import { ConfigService } from '@nestjs/config'
 import * as bcrypt from 'bcrypt'
 
 @Injectable()
@@ -22,8 +23,9 @@ export class AuthService {
     }
 
     async login(user: any, ip: string, userAgent: string) {
-        const expiresIn = 60 // Session expiration time in seconds
+        const expiresIn = Number(process.env.EXPIRATION) // Session expiration time in seconds, should match with JWT token
         const session = await this.sessionsService.createSession(user, ip, userAgent, expiresIn)
+        console.log(session)
 
         const payload = { email: user.email, sub: user.id, sessionId: session.id }
         return {

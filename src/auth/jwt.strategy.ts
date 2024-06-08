@@ -25,7 +25,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             throw new UnauthorizedException()
         }
 
-        const session = await this.sessionsService.findActiveSession(user, '', '')
+        const session = await this.sessionsService.findActiveSession(user)
         if (!session || session.id !== payload.sessionId) {
             throw new UnauthorizedException('Invalid session')
         }

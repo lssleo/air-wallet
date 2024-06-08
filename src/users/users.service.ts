@@ -36,7 +36,7 @@ export class UsersService {
             user.password = hashedPassword
 
             await this.usersRepository.save(user)
-            await this.mailService.sendVerificationEmail(user.email, user.verificationCode)
+            // await this.mailService.sendVerificationEmail(user.email, user.verificationCode)
             return user
         } else if (user && user.isVerified) {
             throw new ConflictException('User already registered and verified.')

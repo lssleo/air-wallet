@@ -29,9 +29,9 @@ export class SessionsService {
         return this.sessionsRepository.save(session)
     }
 
-    async findActiveSession(user: User, ip: string, userAgent: string): Promise<Session> {
+    async findActiveSession(user: User): Promise<Session> {
         return this.sessionsRepository.findOne({
-            where: { user, ip, userAgent, isActive: true, expiresAt: MoreThan(new Date()) },
+            where: { user, isActive: true, expiresAt: MoreThan(new Date()) },
         })
     }
 
