@@ -32,4 +32,18 @@ export class AuthService {
             access_token: this.jwtService.sign(payload, { expiresIn }),
         }
     }
+
+    async validate(payload: any) {
+        const user = await this.usersService.findOne(payload.sub)
+        if (!user) {
+            throw new UnauthorizedException()
+        }
+
+        const session = await this.sessionsService.findActiveSession(user, payload.sessionId)
+        if (!session) {
+            throw new UnauthorizedException('Invalid session')
+        }
+
+        return { userId: payload.sub, email: payload.email }
+    }
 }
