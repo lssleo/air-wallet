@@ -22,7 +22,7 @@ export class AuthService {
     }
 
     async login(user: any, ip: string, userAgent: string) {
-        const expiresIn = 3600 // Session expiration time in seconds
+        const expiresIn = 60 // Session expiration time in seconds
         const session = await this.sessionsService.createSession(user, ip, userAgent, expiresIn)
 
         const payload = { email: user.email, sub: user.id, sessionId: session.id }
