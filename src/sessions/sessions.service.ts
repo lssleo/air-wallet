@@ -20,10 +20,10 @@ export class SessionsService {
         const expiresAt = new Date(Date.now() + expiresIn * 1000)
 
         // close all sessions for user 
-        await this.sessionsRepository.update(
-            { user, ip, userAgent, isActive: true, expiresAt: MoreThan(new Date()) },
-            { isActive: false },
-        )
+        // await this.sessionsRepository.update(
+        //     { user, ip, userAgent, isActive: true, expiresAt: MoreThan(new Date()) },
+        //     { isActive: false },
+        // )
 
         const session = this.sessionsRepository.create({ user, ip, userAgent, expiresAt })
         return this.sessionsRepository.save(session)
