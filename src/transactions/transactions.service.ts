@@ -1,29 +1,41 @@
-import { Injectable, OnModuleInit } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { ethers } from 'ethers'
+import { ConfigService } from '@nestjs/config'
+import { WalletsService } from '../wallets/wallets.service'
+import { BalancesService } from '../balances/balances.service'
 
 @Injectable()
-export class TransactionsService implements OnModuleInit {
-    private provider: ethers.JsonRpcProvider
+export class TransactionsService {
+    private provider: ethers.Provider
 
-    onModuleInit() {
-        this.provider = new ethers.JsonRpcProvider(process.env.JSON_RPC_URL)
-        this.listenForNewBlocks()
-    }
-    /////////////////////////////// UNCOMMENT !!! ////////////////////////////////
-
-    async listenForNewBlocks() {
-        console.log('listenForNewBlocks() stopped')
-        // this.provider.on('block', async (blockNumber) => {
-        //     const block = await this.provider.getBlock(blockNumber)
-        //     this.handleBlock(block)
-        // })
+    constructor(
+        private configService: ConfigService,
+        private walletsService: WalletsService,
+        private balancesService: BalancesService,
+    ) {
+        this.provider = new ethers.JsonRpcProvider(
+            this.configService.get<string>('ETHEREUM_RPC_URL'),
+        )
     }
 
-    async handleBlock(block: ethers.Block) {
-        for (const tx of block.transactions) {
-            // Handle each transaction
-            console.log(tx)
-            // Update balances in the database as needed
+    async startListening() {
+        this.provider.on('block', async (blockNumber) => {
+            const block = await this.provider.getBlock(blockNumber, true)
+            for (const tx of block.prefetchedTransactions) {
+                await this.handleTransaction(tx)
+            }
+        })
+    }
+
+    async handleTransaction(transaction: ethers.TransactionResponse) {
+        const { from, to } = transaction
+        const wallets = await this.walletsService.findAll()
+
+        for (const wallet of wallets) {
+            if (wallet.address === from || wallet.address === to) {
+                const balance = await this.provider.getBalance(wallet.address)
+                await this.balancesService.updateBalance(wallet, 'ETH', ethers.formatEther(balance))
+            }
         }
     }
 }

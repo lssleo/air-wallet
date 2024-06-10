@@ -1,33 +1,31 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Balance } from './balance.entity';
-import { Wallet } from '../wallets/wallet.entity';
+import { Injectable } from '@nestjs/common'
+import { InjectRepository } from '@nestjs/typeorm'
+import { Repository } from 'typeorm'
+import { Balance } from './balance.entity'
+import { Wallet } from '../wallets/wallet.entity'
 
 @Injectable()
 export class BalancesService {
-  constructor(
-    @InjectRepository(Balance)
-    private balancesRepository: Repository<Balance>,
-  ) {}
+    constructor(
+        @InjectRepository(Balance)
+        private balancesRepository: Repository<Balance>,
+    ) {}
 
-  findAll(): Promise<Balance[]> {
-    return this.balancesRepository.find();
-  }
+    async addBalance(wallet: Wallet, currency: string, amount: string): Promise<Balance> {
+        const newBalance = this.balancesRepository.create({ wallet, currency, amount })
+        return this.balancesRepository.save(newBalance)
+    }
 
-  findOne(id: number): Promise<Balance> {
-    return this.balancesRepository.findOneBy({ id });
-  }
+    async updateBalance(wallet: Wallet, currency: string, amount: string): Promise<Balance> {
+        const balance = await this.balancesRepository.findOne({ where: { wallet, currency } })
+        if (balance) {
+            balance.amount = amount
+            return this.balancesRepository.save(balance)
+        }
+        return this.addBalance(wallet, currency, amount)
+    }
 
-  findByWallet(wallet: Wallet): Promise<Balance[]> {
-    return this.balancesRepository.findBy({ wallet });
-  }
-
-  async create(balance: Balance): Promise<Balance> {
-    return this.balancesRepository.save(balance);
-  }
-
-  async remove(id: number): Promise<void> {
-    await this.balancesRepository.delete(id);
-  }
+    async findAllForWallet(wallet: Wallet): Promise<Balance[]> {
+        return this.balancesRepository.find({ where: { wallet } })
+    }
 }

@@ -1,17 +1,17 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
-import { Wallet } from '../wallets/wallet.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm'
+import { Wallet } from '../wallets/wallet.entity'
 
 @Entity()
 export class Balance {
-  @PrimaryGeneratedColumn()
-  id: number;
+    @PrimaryGeneratedColumn()
+    id: number
 
-  @Column()
-  currency: string;
+    @Column()
+    currency: string
 
-  @Column('decimal')
-  balance: number;
+    @Column()
+    amount: string
 
-  @ManyToOne(() => Wallet, (wallet) => wallet.balances)
-  wallet: Wallet;
+    @ManyToOne(() => Wallet, (wallet) => wallet.balances)
+    wallet: Wallet
 }
