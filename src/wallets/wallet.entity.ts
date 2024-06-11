@@ -20,9 +20,9 @@ export class Wallet {
     @ManyToOne(() => User, (user) => user.wallets)
     user: User
 
-    @OneToMany(() => Balance, (balance) => balance.wallet)
+    @OneToMany(() => Balance, (balance) => balance.wallet, { cascade: true })
     balances: Balance[]
 
-    @OneToMany(() => Transaction, (transaction) => transaction.wallet)
+    @OneToMany(() => Transaction, (transaction) => transaction.wallet, { cascade: true })
     transactions: Transaction[]
 }

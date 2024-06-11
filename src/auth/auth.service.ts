@@ -43,6 +43,6 @@ export class AuthService {
             throw new UnauthorizedException('Invalid session')
         }
 
-        return { userId: payload.sub, email: payload.email }
+        return { id: payload.sub, email: payload.email }
     }
 }
