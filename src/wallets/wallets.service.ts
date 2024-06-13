@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { CreateWalletDto } from './dto/create-wallet.dto'
 import { Repository } from 'typeorm'
 import { Wallet } from './wallet.entity'
 import { User } from '../users/user.entity'
@@ -16,7 +15,7 @@ export class WalletsService {
         private readonly configService: ConfigService,
     ) {}
 
-    async createWallet(user: User, createWalletDto: CreateWalletDto): Promise<Wallet> {
+    async createWallet(user: User): Promise<Wallet> {
         const wallet = ethers.Wallet.createRandom()
         const address = wallet.address
         const privateKey = wallet.privateKey
