@@ -1,28 +1,40 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
-import { BalancesService } from './balances.service';
-import { Balance } from './balance.entity';
+import { Controller, Post, Get, Body, Param, UseGuards, Request, NotFoundException } from '@nestjs/common'
+import { BalancesService } from './balances.service'
+import { WalletsService } from '../wallets/wallets.service'
+import { AuthGuard } from '@nestjs/passport'
+import { User } from '../users/user.entity'
 
 @Controller('balances')
 export class BalancesController {
-  constructor(private readonly balancesService: BalancesService) {}
+    constructor(
+        private readonly balancesService: BalancesService,
+        private readonly walletsService: WalletsService,
+    ) {}
 
-  @Get()
-  findAll(): Promise<Balance[]> {
-    return this.balancesService.findAll();
-  }
+    // @UseGuards(AuthGuard('jwt'))
+    // @Post('add')
+    // async addBalance(
+    //     @Request() req,
+    //     @Body('walletId') walletId: number,
+    //     @Body('currency') currency: string,
+    //     @Body('amount') amount: string,
+    // ) {
+    //     const user: User = req.user
+    //     const wallet = await this.walletsService.findOneForUser(user, walletId)
+    //     if (wallet) {
+    //         return this.balancesService.addBalance(wallet, currency, amount)
+    //     }
+    //     throw new NotFoundException('Wallet not found')
+    // }
 
-  @Get(':id')
-  findOne(@Param('id') id: string): Promise<Balance> {
-    return this.balancesService.findOne(+id);
-  }
-
-  @Post()
-  create(@Body() balance: Balance): Promise<Balance> {
-    return this.balancesService.create(balance);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string): Promise<void> {
-    return this.balancesService.remove(+id);
-  }
+    @UseGuards(AuthGuard('jwt'))
+    @Get('wallet/:walletId')
+    async findAllForWallet(@Request() req, @Param('walletId') walletId: number) {
+        const user: User = req.user
+        const wallet = await this.walletsService.findOneForUser(user, walletId)
+        if (wallet) {
+            return this.balancesService.findAllForWallet(wallet)
+        }
+        throw new NotFoundException('Wallet not found')
+    }
 }

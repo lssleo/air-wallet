@@ -36,7 +36,8 @@ export class UsersService {
             user.password = hashedPassword
 
             await this.usersRepository.save(user)
-            await this.mailService.sendVerificationEmail(user.email, user.verificationCode)
+            // await this.mailService.sendVerificationEmail(user.email, user.verificationCode)
+            console.log('SENDING MESSAGES TO EMAIL DISABLED in users.sevice.ts')
             return user
         } else if (user && user.isVerified) {
             throw new ConflictException('User already registered and verified.')
@@ -63,7 +64,7 @@ export class UsersService {
         const user = await this.findByEmail(email)
         if (user && user.verificationCode === code) {
             user.isVerified = true
-            user.verificationCode = null 
+            user.verificationCode = null
             await this.usersRepository.save(user)
             return true
         }

@@ -1,28 +1,31 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
-import { WalletsService } from './wallets.service';
-import { Wallet } from './wallet.entity';
+import { Controller, Post, Get, Body, UseGuards, Request, Param } from '@nestjs/common'
+import { WalletsService } from './wallets.service'
+import { AuthGuard } from '@nestjs/passport'
+import { User } from '../users/user.entity'
+import { CreateWalletDto } from './dto/create-wallet.dto'
 
 @Controller('wallets')
 export class WalletsController {
-  constructor(private readonly walletsService: WalletsService) {}
+    constructor(private readonly walletsService: WalletsService) {}
 
-  @Get()
-  findAll(): Promise<Wallet[]> {
-    return this.walletsService.findAll();
-  }
+    @UseGuards(AuthGuard('jwt'))
+    @Post('generate')
+    async generate(@Request() req, @Body() createWalletDto: CreateWalletDto) {
+        const user: User = req.user
+        return this.walletsService.createWallet(user, createWalletDto)
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string): Promise<Wallet> {
-    return this.walletsService.findOne(+id);
-  }
+    @UseGuards(AuthGuard('jwt'))
+    @Get()
+    async findAllForUser(@Request() req) {
+        const user: User = req.user
+        return this.walletsService.findAllForUser(user)
+    }
 
-  @Post()
-  create(@Body() wallet: Wallet): Promise<Wallet> {
-    return this.walletsService.create(wallet);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string): Promise<void> {
-    return this.walletsService.remove(+id);
-  }
+    @UseGuards(AuthGuard('jwt'))
+    @Get(':id')
+    async findOneForUser(@Request() req, @Param('id') id: number) {
+        const user: User = req.user
+        return this.walletsService.findOneForUser(user, id)
+    }
 }

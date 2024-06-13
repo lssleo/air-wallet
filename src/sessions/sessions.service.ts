@@ -19,24 +19,28 @@ export class SessionsService {
     ): Promise<Session> {
         const expiresAt = new Date(Date.now() + expiresIn * 1000)
 
-        // close all sessions for user 
-        await this.sessionsRepository.update(
-            { user, ip, userAgent, isActive: true, expiresAt: MoreThan(new Date()) },
-            { isActive: false },
-        )
+        // close all sessions for user
+        // await this.sessionsRepository.update(
+        //     { user, ip, userAgent, isActive: true, expiresAt: MoreThan(new Date()) },
+        //     { isActive: false },
+        // )
 
         const session = this.sessionsRepository.create({ user, ip, userAgent, expiresAt })
         return this.sessionsRepository.save(session)
     }
 
-    async findActiveSession(user: User, ip: string, userAgent: string): Promise<Session> {
+    async findActiveSession(user: User, sessionId: number): Promise<Session> {
         return this.sessionsRepository.findOne({
-            where: { user, ip, userAgent, isActive: true, expiresAt: MoreThan(new Date()) },
+            where: { user, id: sessionId, isActive: true, expiresAt: MoreThan(new Date()) },
         })
     }
 
     async invalidateSession(session: Session): Promise<void> {
         session.isActive = false
         await this.sessionsRepository.save(session)
+    }
+
+    async closeSession(sessionId: number): Promise<void> {
+        await this.sessionsRepository.update({ id: sessionId }, { isActive: false })
     }
 }

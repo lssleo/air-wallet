@@ -1,26 +1,37 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
-import { Wallet } from 'src/wallets/wallet.entity';
+// transaction.entity.ts
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm'
+import { Wallet } from '../wallets/wallet.entity'
+import { Network } from '../networks/network.entity'
 
 @Entity()
 export class Transaction {
-  @PrimaryGeneratedColumn()
-  id: number;
+    @PrimaryGeneratedColumn()
+    id: number
 
-  @Column()
-  hash: string;
+    @Column()
+    hash: string
 
-  @Column()
-  from: string;
+    @Column()
+    from: string
 
-  @Column()
-  to: string;
+    @Column()
+    to: string
 
-  @Column('decimal')
-  amount: number;
+    @Column()
+    value: string
 
-  @Column('decimal')
-  fee: number;
+    @Column()
+    gasUsed: string
 
-  @ManyToOne(() => Wallet, (wallet) => wallet.transactions)
-  wallet: Wallet;
+    @Column()
+    gasPrice: string
+
+    @Column()
+    fee: string
+
+    @ManyToOne(() => Network, (network) => network.transactions)
+    network: Network
+
+    @ManyToOne(() => Wallet, (wallet) => wallet.transactions)
+    wallet: Wallet
 }
