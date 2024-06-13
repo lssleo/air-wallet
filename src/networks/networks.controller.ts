@@ -13,7 +13,7 @@ export class NetworksController {
 
   @Get(':id')
   findOne(@Param('id') id: string): Promise<Network> {
-    return this.networksService.findOne(+id);
+    return this.networksService.findOneById(+id);
   }
 
   @Post()

@@ -12,9 +12,6 @@ export class Wallet {
     address: string
 
     @Column()
-    network: string
-
-    @Column()
     encryptedPrivateKey: string
 
     @ManyToOne(() => User, (user) => user.wallets)

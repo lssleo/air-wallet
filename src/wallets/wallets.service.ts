@@ -4,6 +4,7 @@ import { CreateWalletDto } from './dto/create-wallet.dto'
 import { Repository } from 'typeorm'
 import { Wallet } from './wallet.entity'
 import { User } from '../users/user.entity'
+import { ConfigService } from '@nestjs/config'
 import { ethers } from 'ethers'
 import * as crypto from 'crypto-js'
 
@@ -12,43 +13,31 @@ export class WalletsService {
     constructor(
         @InjectRepository(Wallet)
         private walletsRepository: Repository<Wallet>,
+        private readonly configService: ConfigService,
     ) {}
 
     async createWallet(user: User, createWalletDto: CreateWalletDto): Promise<Wallet> {
-        let address
-        let privateKey
-        switch (createWalletDto.network) {
-            case 'ethereum':
-                const wallet = ethers.Wallet.createRandom()
-                address = wallet.address
-                privateKey = wallet.privateKey
-                break
-            default:
-                throw new Error('Unsupported network')
-        }
-
+        const wallet = ethers.Wallet.createRandom()
+        const address = wallet.address
+        const privateKey = wallet.privateKey
         const encryptedPrivateKey = this.encryptPrivateKey(privateKey)
 
         const newWallet = this.walletsRepository.create({
             address: address,
-            network: createWalletDto.network,
             encryptedPrivateKey: encryptedPrivateKey,
             user: user,
-            balances: [],
-            transactions: [],
         })
 
-        const savedWallet = await this.walletsRepository.save(newWallet)
-
-        return savedWallet
+        await this.walletsRepository.save(newWallet)
+        return newWallet
     }
 
-    encryptPrivateKey(privateKey: string): string {
+    private encryptPrivateKey(privateKey: string): string {
         const encrypted = crypto.AES.encrypt(privateKey, process.env.ENCRYPTION_KEY).toString()
         return encrypted
     }
 
-    decryptPrivateKey(encryptedPrivateKey: string): string {
+    private decryptPrivateKey(encryptedPrivateKey: string): string {
         const bytes = crypto.AES.decrypt(encryptedPrivateKey, process.env.ENCRYPTION_KEY)
         const decrypted = bytes.toString(crypto.enc.Utf8)
         return decrypted
@@ -57,18 +46,27 @@ export class WalletsService {
     async findOneForUser(user: User, walletId: number): Promise<Wallet> {
         return this.walletsRepository.findOne({
             where: { id: walletId, user: { id: user.id } },
-            relations: ['user','balances', 'transactions'], // maybe remove user from here 
+            relations: ['balances', 'transactions', 'balances.network', 'transactions.network'], // maybe remove user from here
+        })
+    }
+
+    async findOneByAddress(address: string): Promise<Wallet> {
+        return this.walletsRepository.findOne({
+            where: { address },
+            relations: ['balances', 'transactions', 'balances.network', 'transactions.network'],
         })
     }
 
     async findAllForUser(user: User): Promise<Wallet[]> {
         return this.walletsRepository.find({
             where: { user },
-            relations: ['user', 'balances', 'transactions'], // link with another entities
+            relations: ['balances', 'transactions', 'balances.network', 'transactions.network'], // link with another entities
         })
     }
 
     async findAll(): Promise<Wallet[]> {
-        return this.walletsRepository.find({ relations: ['user', 'balances', 'transactions'] })
+        return this.walletsRepository.find({
+            relations: ['balances', 'transactions', 'balances.network', 'transactions.network'],
+        })
     }
 }

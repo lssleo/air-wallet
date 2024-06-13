@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { Balance } from './balance.entity'
 import { Wallet } from '../wallets/wallet.entity'
+import { Network } from '../networks/network.entity'
 
 @Injectable()
 export class BalancesService {
@@ -11,24 +12,45 @@ export class BalancesService {
         private balancesRepository: Repository<Balance>,
     ) {}
 
-    async addBalance(wallet: Wallet, currency: string, amount: string): Promise<Balance> {
-        const newBalance = this.balancesRepository.create({ wallet, currency, amount })
+    async addBalance(
+        wallet: Wallet,
+        network: Network,
+        currency: string,
+        amount: string,
+    ): Promise<Balance> {
+        const newBalance = this.balancesRepository.create({ wallet, network, currency, amount })
         return this.balancesRepository.save(newBalance)
     }
 
-    async updateBalance(wallet: Wallet, currency: string, amount: string): Promise<Balance> {
-        const balance = await this.balancesRepository.findOne({ where: { wallet, currency } })
+    async updateBalance(
+        wallet: Wallet,
+        network: Network,
+        currency: string,
+        amount: string,
+    ): Promise<Balance> {
+        const balance = await this.balancesRepository.findOne({
+            where: { wallet, network, currency },
+        })
         if (balance) {
             balance.amount = amount
             return this.balancesRepository.save(balance)
         }
-        return this.addBalance(wallet, currency, amount)
+        return this.addBalance(wallet, network, currency, amount)
+    }
+
+    async deleteBalance(wallet: Wallet, network: Network, currency: string): Promise<void> {
+        const balance = await this.balancesRepository.findOne({
+            where: { wallet, network, currency },
+        })
+        if (balance) {
+            await this.balancesRepository.remove(balance)
+        }
     }
 
     async findAllForWallet(wallet: Wallet): Promise<Balance[]> {
         return this.balancesRepository.find({
             where: { wallet: { id: wallet.id } },
-            relations: ['wallet'], // can be removed
+            relations: ['wallet', 'network'], // can be removed
         })
     }
 }

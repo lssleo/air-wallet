@@ -1,5 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm'
 import { Wallet } from '../wallets/wallet.entity'
+import { Network } from '../networks/network.entity'
 
 @Entity()
 export class Balance {
@@ -14,4 +15,7 @@ export class Balance {
 
     @ManyToOne(() => Wallet, (wallet) => wallet.balances)
     wallet: Wallet
+
+    @ManyToOne(() => Network, (network) => network.balances)
+    network: Network
 }

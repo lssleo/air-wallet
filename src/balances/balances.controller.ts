@@ -11,21 +11,21 @@ export class BalancesController {
         private readonly walletsService: WalletsService,
     ) {}
 
-    @UseGuards(AuthGuard('jwt'))
-    @Post('add')
-    async addBalance(
-        @Request() req,
-        @Body('walletId') walletId: number,
-        @Body('currency') currency: string,
-        @Body('amount') amount: string,
-    ) {
-        const user: User = req.user
-        const wallet = await this.walletsService.findOneForUser(user, walletId)
-        if (wallet) {
-            return this.balancesService.addBalance(wallet, currency, amount)
-        }
-        throw new NotFoundException('Wallet not found')
-    }
+    // @UseGuards(AuthGuard('jwt'))
+    // @Post('add')
+    // async addBalance(
+    //     @Request() req,
+    //     @Body('walletId') walletId: number,
+    //     @Body('currency') currency: string,
+    //     @Body('amount') amount: string,
+    // ) {
+    //     const user: User = req.user
+    //     const wallet = await this.walletsService.findOneForUser(user, walletId)
+    //     if (wallet) {
+    //         return this.balancesService.addBalance(wallet, currency, amount)
+    //     }
+    //     throw new NotFoundException('Wallet not found')
+    // }
 
     @UseGuards(AuthGuard('jwt'))
     @Get('wallet/:walletId')

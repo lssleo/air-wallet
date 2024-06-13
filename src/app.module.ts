@@ -1,4 +1,7 @@
-import { Module } from '@nestjs/common'
+import { Module, OnModuleInit } from '@nestjs/common'
+import { NetworkSeed } from './networks/network.seed'
+import { Network } from './networks/network.entity'
+import { NetworksModule } from './networks/networks.module'
 import { ConfigModule } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { AuthModule } from './auth/auth.module'
@@ -6,15 +9,14 @@ import { UsersModule } from './users/users.module'
 import { WalletsModule } from './wallets/wallets.module'
 import { BalancesModule } from './balances/balances.module'
 import { AssetsModule } from './assets/assets.module'
-import { NetworksModule } from './networks/networks.module'
 import { TransactionsModule } from './transactions/transactions.module'
 import { MailService } from './common/mail.service.ts'
-import { BalancesService } from './balances/balances.service'
-import { BalancesController } from './balances/balances.controller'
+import { TokensModule } from './tokens/tokens.module'
 
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true }),
+        TypeOrmModule.forFeature([Network]),
         TypeOrmModule.forRoot({
             type: 'postgres',
             host: 'localhost',
@@ -33,8 +35,15 @@ import { BalancesController } from './balances/balances.controller'
         AssetsModule,
         NetworksModule,
         TransactionsModule,
+        TokensModule,
     ],
-    providers: [MailService],
+    providers: [MailService, NetworkSeed],
     controllers: [],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+    constructor(private readonly networkSeed: NetworkSeed) {}
+
+    async onModuleInit() {
+        await this.networkSeed.seed()
+    }
+}

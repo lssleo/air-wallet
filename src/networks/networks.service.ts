@@ -5,24 +5,24 @@ import { Network } from './network.entity';
 
 @Injectable()
 export class NetworksService {
-  constructor(
-    @InjectRepository(Network)
-    private networksRepository: Repository<Network>,
-  ) {}
+    constructor(
+        @InjectRepository(Network)
+        private networksRepository: Repository<Network>,
+    ) {}
 
-  findAll(): Promise<Network[]> {
-    return this.networksRepository.find();
-  }
+    findAll(): Promise<Network[]> {
+        return this.networksRepository.find()
+    }
 
-  findOne(id: number): Promise<Network> {
-    return this.networksRepository.findOneBy({ id });
-  }
+    findOneById(id: number): Promise<Network> {
+        return this.networksRepository.findOneBy({ id })
+    }
+  
+    async create(network: Network): Promise<Network> {
+        return this.networksRepository.save(network)
+    }
 
-  async create(network: Network): Promise<Network> {
-    return this.networksRepository.save(network);
-  }
-
-  async remove(id: number): Promise<void> {
-    await this.networksRepository.delete(id);
-  }
+    async remove(id: number): Promise<void> {
+        await this.networksRepository.delete(id)
+    }
 }
