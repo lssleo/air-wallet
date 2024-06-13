@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, UseGuards, Request } from '@nestjs/common'
+import { Controller, Post, Get, Body, Param, UseGuards, Request, NotFoundException } from '@nestjs/common'
 import { BalancesService } from './balances.service'
 import { WalletsService } from '../wallets/wallets.service'
 import { AuthGuard } from '@nestjs/passport'
@@ -24,7 +24,7 @@ export class BalancesController {
         if (wallet) {
             return this.balancesService.addBalance(wallet, currency, amount)
         }
-        throw new Error('Wallet not found')
+        throw new NotFoundException('Wallet not found')
     }
 
     @UseGuards(AuthGuard('jwt'))
@@ -35,6 +35,6 @@ export class BalancesController {
         if (wallet) {
             return this.balancesService.findAllForWallet(wallet)
         }
-        throw new Error('Wallet not found')
+        throw new NotFoundException('Wallet not found')
     }
 }

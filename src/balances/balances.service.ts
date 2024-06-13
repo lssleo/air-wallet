@@ -26,6 +26,9 @@ export class BalancesService {
     }
 
     async findAllForWallet(wallet: Wallet): Promise<Balance[]> {
-        return this.balancesRepository.find({ where: { wallet } })
+        return this.balancesRepository.find({
+            where: { wallet: { id: wallet.id } },
+            relations: ['wallet'], // can be removed
+        })
     }
 }

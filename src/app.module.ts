@@ -9,6 +9,8 @@ import { AssetsModule } from './assets/assets.module'
 import { NetworksModule } from './networks/networks.module'
 import { TransactionsModule } from './transactions/transactions.module'
 import { MailService } from './common/mail.service.ts'
+import { BalancesService } from './balances/balances.service'
+import { BalancesController } from './balances/balances.controller'
 
 @Module({
     imports: [
@@ -33,5 +35,6 @@ import { MailService } from './common/mail.service.ts'
         TransactionsModule,
     ],
     providers: [MailService],
+    controllers: [],
 })
 export class AppModule {}

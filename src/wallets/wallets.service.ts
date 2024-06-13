@@ -55,14 +55,20 @@ export class WalletsService {
     }
 
     async findOneForUser(user: User, walletId: number): Promise<Wallet> {
-        return this.walletsRepository.findOne({ where: { id: walletId, user } })
+        return this.walletsRepository.findOne({
+            where: { id: walletId, user: { id: user.id } },
+            relations: ['user','balances', 'transactions'], // maybe remove user from here 
+        })
     }
 
     async findAllForUser(user: User): Promise<Wallet[]> {
-        return this.walletsRepository.find({ where: { user } })
+        return this.walletsRepository.find({
+            where: { user },
+            relations: ['user', 'balances', 'transactions'], // link with another entities
+        })
     }
 
     async findAll(): Promise<Wallet[]> {
-        return this.walletsRepository.find()
+        return this.walletsRepository.find({ relations: ['user', 'balances', 'transactions'] })
     }
 }
