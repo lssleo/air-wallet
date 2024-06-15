@@ -12,6 +12,9 @@ export class Token {
     symbol: string
 
     @Column()
+    decimals: number
+
+    @Column()
     address: string
 
     @Column()

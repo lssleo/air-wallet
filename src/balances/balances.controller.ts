@@ -11,22 +11,6 @@ export class BalancesController {
         private readonly walletsService: WalletsService,
     ) {}
 
-    // @UseGuards(AuthGuard('jwt'))
-    // @Post('add')
-    // async addBalance(
-    //     @Request() req,
-    //     @Body('walletId') walletId: number,
-    //     @Body('currency') currency: string,
-    //     @Body('amount') amount: string,
-    // ) {
-    //     const user: User = req.user
-    //     const wallet = await this.walletsService.findOneForUser(user, walletId)
-    //     if (wallet) {
-    //         return this.balancesService.addBalance(wallet, currency, amount)
-    //     }
-    //     throw new NotFoundException('Wallet not found')
-    // }
-
     @UseGuards(AuthGuard('jwt'))
     @Get('wallet/:walletId')
     async findAllForWallet(@Request() req, @Param('walletId') walletId: number) {
@@ -35,6 +19,23 @@ export class BalancesController {
         if (wallet) {
             return this.balancesService.findAllForWallet(wallet)
         }
-        throw new NotFoundException('Wallet not found')
+        throw new NotFoundException('Wallet not found or access denied')
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Get('wallet/:walletId/currency/:currency')
+    async findForWalletAndCurrency(
+        @Request() req,
+        @Param('walletId') walletId: number,
+        @Param('currency') currency: string,
+    ) {
+        const userId = req.user.id
+        const wallet = await this.balancesService.findWalletForUser(userId, walletId)
+
+        if (!wallet) {
+            throw new NotFoundException('Wallet not found or access denied')
+        }
+
+        return this.balancesService.findForWalletAndCurrency(walletId, currency)
     }
 }

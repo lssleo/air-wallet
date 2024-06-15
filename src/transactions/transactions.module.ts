@@ -6,15 +6,17 @@ import { TransactionsService } from './transactions.service'
 import { WalletsModule } from '../wallets/wallets.module'
 import { BalancesModule } from '../balances/balances.module'
 import { ConfigModule } from '@nestjs/config'
+import { TokensService } from 'src/tokens/tokens.service'
+import { Token } from 'src/tokens/token.entity'
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Transaction, Network]),
+        TypeOrmModule.forFeature([Transaction, Network, Token]),
         WalletsModule,
         BalancesModule,
         ConfigModule,
     ],
-    providers: [TransactionsService],
+    providers: [TransactionsService, TokensService],
 })
 export class TransactionsModule implements OnModuleInit {
     constructor(private readonly transactionsService: TransactionsService) {}

@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { Token } from './token.entity'
+import { AddTokenDto } from './dto/add-token.dto'
+import { UpdateTokenDto } from './dto/update-token.dto'
 
 @Injectable()
 export class TokensService {
@@ -10,30 +12,29 @@ export class TokensService {
         private tokensRepository: Repository<Token>,
     ) {}
 
-    async addToken(name: string, symbol: string, address: string, network: string): Promise<Token> {
-        const newToken = this.tokensRepository.create({ name, symbol, address, network })
+    async addToken(addTokenDto: AddTokenDto): Promise<Token> {
+        const newToken = this.tokensRepository.create({
+            name: addTokenDto.name,
+            symbol: addTokenDto.symbol,
+            address: addTokenDto.address,
+            network: addTokenDto.network,
+        })
         return this.tokensRepository.save(newToken)
     }
 
-    async updateToken(
-        id: number,
-        name: string,
-        symbol: string,
-        address: string,
-        network: string,
-    ): Promise<Token> {
+    async update(id: number, updateTokenDto: UpdateTokenDto): Promise<Token> {
         const token = await this.tokensRepository.findOne({ where: { id } })
         if (token) {
-            token.name = name
-            token.symbol = symbol
-            token.address = address
-            token.network = network
+            token.name = updateTokenDto?.name
+            token.symbol = updateTokenDto?.symbol
+            token.address = updateTokenDto?.address
+            token.network = updateTokenDto?.network
             return this.tokensRepository.save(token)
         }
         throw new Error('Token not found')
     }
 
-    async deleteToken(id: number): Promise<void> {
+    async remove(id: number): Promise<void> {
         const token = await this.tokensRepository.findOne({ where: { id } })
         if (token) {
             await this.tokensRepository.remove(token)
