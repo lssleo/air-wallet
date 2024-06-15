@@ -2,17 +2,15 @@ import {
     Controller,
     Post,
     Get,
-    Body,
     UseGuards,
     Request,
     Param,
     Delete,
     NotFoundException,
-    Patch,
 } from '@nestjs/common'
 import { WalletsService } from './wallets.service'
 import { AuthGuard } from '@nestjs/passport'
-import { User } from '../users/user.entity'
+import { user } from '@prisma/client'
 
 @Controller('wallets')
 export class WalletsController {
@@ -21,7 +19,7 @@ export class WalletsController {
     @UseGuards(AuthGuard('jwt'))
     @Post('generate')
     async generate(@Request() req) {
-        const user: User = req.user
+        const user: user = req.user
         return this.walletsService.createWallet(user)
     }
 
@@ -31,24 +29,24 @@ export class WalletsController {
         const user = req.user
         const wallet = await this.walletsService.findOneForUser(user, id)
 
-        if (!wallet || wallet.user.id !== user.id) {
+        if (!wallet || wallet.userId !== user.id) {
             throw new NotFoundException('Wallet not found or access denied')
         }
 
-        await this.walletsService.remove(wallet.id.toString())
+        await this.walletsService.remove(wallet.id)
     }
 
     @UseGuards(AuthGuard('jwt'))
     @Get()
     async findAllForUser(@Request() req) {
-        const user: User = req.user
-        return this.walletsService.findAllForUser(user)
+        const user: user = req.user
+        return this.walletsService.findAllForUser(user.id)
     }
 
     @UseGuards(AuthGuard('jwt'))
     @Get(':id')
     async findOneForUser(@Request() req, @Param('id') id: number) {
-        const user: User = req.user
-        return this.walletsService.findOneForUser(user, id)
+        const user: user = req.user
+        return this.walletsService.findOneForUser(user.id, id)
     }
 }

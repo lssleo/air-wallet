@@ -1,47 +1,43 @@
 import { Injectable } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
-import { Token } from './token.entity'
+import { PrismaService } from '../prisma/prisma.service'
 import { AddTokenDto } from './dto/add-token.dto'
 import { UpdateTokenDto } from './dto/update-token.dto'
+import { token } from '@prisma/client'
 
 @Injectable()
 export class TokensService {
-    constructor(
-        @InjectRepository(Token)
-        private tokensRepository: Repository<Token>,
-    ) {}
+    constructor(private prisma: PrismaService) {}
 
-    async addToken(addTokenDto: AddTokenDto): Promise<Token> {
-        const newToken = this.tokensRepository.create({
-            name: addTokenDto.name,
-            symbol: addTokenDto.symbol,
-            address: addTokenDto.address,
-            network: addTokenDto.network,
+    async addToken(addTokenDto: AddTokenDto): Promise<token> {
+        return this.prisma.token.create({
+            data: {
+                name: addTokenDto.name,
+                symbol: addTokenDto.symbol,
+                decimals: addTokenDto.decimals,
+                address: addTokenDto.address,
+                network: addTokenDto.network,
+            },
         })
-        return this.tokensRepository.save(newToken)
     }
 
-    async update(id: number, updateTokenDto: UpdateTokenDto): Promise<Token> {
-        const token = await this.tokensRepository.findOne({ where: { id } })
-        if (token) {
-            token.name = updateTokenDto?.name
-            token.symbol = updateTokenDto?.symbol
-            token.address = updateTokenDto?.address
-            token.network = updateTokenDto?.network
-            return this.tokensRepository.save(token)
-        }
-        throw new Error('Token not found')
+    async update(id: number, updateTokenDto: UpdateTokenDto): Promise<token> {
+        return this.prisma.token.update({
+            where: { id },
+            data: {
+                name: updateTokenDto?.name,
+                symbol: updateTokenDto?.symbol,
+                decimals: updateTokenDto?.decimals,
+                address: updateTokenDto?.address,
+                network: updateTokenDto?.network,
+            },
+        })
     }
 
     async remove(id: number): Promise<void> {
-        const token = await this.tokensRepository.findOne({ where: { id } })
-        if (token) {
-            await this.tokensRepository.remove(token)
-        }
+        await this.prisma.token.delete({ where: { id } })
     }
 
-    async findAllTokens(): Promise<Token[]> {
-        return this.tokensRepository.find()
+    async findAllTokens(): Promise<token[]> {
+        return this.prisma.token.findMany()
     }
 }

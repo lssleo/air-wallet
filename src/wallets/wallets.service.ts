@@ -1,11 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
-import { Wallet } from './wallet.entity'
-import { User } from '../users/user.entity'
+import { PrismaService } from '../prisma/prisma.service'
+import { user, wallet } from '@prisma/client'
 import { ConfigService } from '@nestjs/config'
 import { ethers } from 'ethers'
-import { Network } from 'src/networks/network.entity'
 import { BalancesService } from 'src/balances/balances.service'
 import { TokensService } from 'src/tokens/tokens.service'
 import { erc20Abi } from 'src/abi/erc20'
@@ -15,33 +12,29 @@ import * as crypto from 'crypto-js'
 @Injectable()
 export class WalletsService {
     constructor(
-        @InjectRepository(Wallet)
-        private walletsRepository: Repository<Wallet>,
+        private prisma: PrismaService,
         private readonly configService: ConfigService,
-        @InjectRepository(Network)
-        private networksRepository: Repository<Network>,
         private balancesService: BalancesService,
         private tokensService: TokensService,
     ) {}
 
-    async createWallet(user: User): Promise<Wallet> {
+    async createWallet(user: user): Promise<wallet> {
         const wallet = ethers.Wallet.createRandom()
         const address = wallet.address
         const privateKey = wallet.privateKey
         const encryptedPrivateKey = this.encryptPrivateKey(privateKey)
 
-        const newWallet = this.walletsRepository.create({
-            address: address,
-            encryptedPrivateKey: encryptedPrivateKey,
-            user: user,
+        return this.prisma.wallet.create({
+            data: {
+                address: address,
+                encryptedPrivateKey: encryptedPrivateKey,
+                userId: user.id,
+            },
         })
-
-        await this.walletsRepository.save(newWallet)
-        return newWallet
     }
 
-    async remove(id: string): Promise<void> {
-        await this.walletsRepository.delete(id)
+    async remove(id: number): Promise<void> {
+        await this.prisma.wallet.delete({ where: { id } })
     }
 
     private encryptPrivateKey(privateKey: string): string {
@@ -59,7 +52,7 @@ export class WalletsService {
         const wallet = await this.findOne(id)
         if (!wallet) throw new NotFoundException('Wallet not found')
 
-        const networks = await this.networksRepository.find()
+        const networks = await this.prisma.network.findMany()
         const tokens = await this.tokensService.findAllTokens()
 
         for (const network of networks) {
@@ -67,8 +60,8 @@ export class WalletsService {
             const provider = new ethers.JsonRpcProvider(rpcUrl)
             const balance = await provider.getBalance(wallet.address)
             await this.balancesService.updateBalance(
-                wallet,
-                network,
+                wallet.id,
+                network.id,
                 network.nativeCurrency,
                 ethers.formatEther(balance),
             )
@@ -78,8 +71,8 @@ export class WalletsService {
                     const erc20Contract = new ethers.Contract(token.address, erc20Abi, provider)
                     const tokenBalance = await erc20Contract.balanceOf(wallet.address)
                     await this.balancesService.updateBalance(
-                        wallet,
-                        network,
+                        wallet.id,
+                        network.id,
                         token.symbol,
                         ethers.formatUnits(tokenBalance, token.decimals),
                     )
@@ -88,37 +81,52 @@ export class WalletsService {
         }
     }
 
-    async findOne(walletId: number): Promise<Wallet> {
-        return this.walletsRepository.findOne({
+    async findOne(walletId: number): Promise<wallet> {
+        return this.prisma.wallet.findUnique({
             where: { id: walletId },
-            relations: ['balances', 'transactions', 'balances.network', 'transactions.network'], // maybe remove user from here
+            include: {
+                balance: { include: { network: true } },
+                transaction: { include: { network: true } },
+            },
         })
     }
 
-    async findOneForUser(user: User, walletId: number): Promise<Wallet> {
-        return this.walletsRepository.findOne({
-            where: { id: walletId, user: { id: user.id } },
-            relations: ['balances', 'transactions', 'balances.network', 'transactions.network'], // maybe remove user from here
+    async findOneForUser(userId: number, walletId: number): Promise<wallet> {
+        return this.prisma.wallet.findFirst({
+            where: { id: walletId, userId: userId },
+            include: {
+                balance: { include: { network: true } },
+                transaction: { include: { network: true } },
+            },
         })
     }
 
-    async findOneByAddress(address: string): Promise<Wallet> {
-        return this.walletsRepository.findOne({
+    async findOneByAddress(address: string): Promise<wallet> {
+        return this.prisma.wallet.findFirst({
             where: { address },
-            relations: ['balances', 'transactions', 'balances.network', 'transactions.network'],
+            include: {
+                balance: { include: { network: true } },
+                transaction: { include: { network: true } },
+            },
         })
     }
 
-    async findAllForUser(user: User): Promise<Wallet[]> {
-        return this.walletsRepository.find({
-            where: { user },
-            relations: ['balances', 'transactions', 'balances.network', 'transactions.network'], // link with another entities
+    async findAllForUser(userId: number): Promise<wallet[]> {
+        return this.prisma.wallet.findMany({
+            where: { userId: userId },
+            include: {
+                balance: { include: { network: true } },
+                transaction: { include: { network: true } },
+            },
         })
     }
 
-    async findAll(): Promise<Wallet[]> {
-        return this.walletsRepository.find({
-            relations: ['balances', 'transactions', 'balances.network', 'transactions.network'],
+    async findAll(): Promise<wallet[]> {
+        return this.prisma.wallet.findMany({
+            include: {
+                balance: { include: { network: true } },
+                transaction: { include: { network: true } },
+            },
         })
     }
 }

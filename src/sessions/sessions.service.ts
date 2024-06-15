@@ -1,22 +1,17 @@
 import { Injectable } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, MoreThan } from 'typeorm'
-import { Session } from './session.entity'
-import { User } from '../users/user.entity'
+import { PrismaService } from '../prisma/prisma.service'
+import { session, user } from '@prisma/client'
 
 @Injectable()
 export class SessionsService {
-    constructor(
-        @InjectRepository(Session)
-        private sessionsRepository: Repository<Session>,
-    ) {}
+    constructor(private prisma: PrismaService) {}
 
     async createSession(
-        user: User,
+        user: user,
         ip: string,
         userAgent: string,
         expiresIn: number,
-    ): Promise<Session> {
+    ): Promise<session> {
         const expiresAt = new Date(Date.now() + expiresIn * 1000)
 
         // close all sessions for user
@@ -25,22 +20,33 @@ export class SessionsService {
         //     { isActive: false },
         // )
 
-        const session = this.sessionsRepository.create({ user, ip, userAgent, expiresAt })
-        return this.sessionsRepository.save(session)
-    }
-
-    async findActiveSession(user: User, sessionId: number): Promise<Session> {
-        return this.sessionsRepository.findOne({
-            where: { user, id: sessionId, isActive: true, expiresAt: MoreThan(new Date()) },
+        return this.prisma.session.create({
+            data: {
+                userId: user.id,
+                ip,
+                userAgent,
+                expiresAt,
+            },
         })
     }
 
-    async invalidateSession(session: Session): Promise<void> {
-        session.isActive = false
-        await this.sessionsRepository.save(session)
+    async findActiveSession(user: user, sessionId: number): Promise<session> {
+        return this.prisma.session.findFirst({
+            where: {
+                userId: user.id,
+                id: sessionId,
+                isActive: true,
+                expiresAt: {
+                    gt: new Date(),
+                },
+            },
+        })
     }
 
     async closeSession(sessionId: number): Promise<void> {
-        await this.sessionsRepository.update({ id: sessionId }, { isActive: false })
+        await this.prisma.session.update({
+            where: { id: sessionId },
+            data: { isActive: false },
+        })
     }
 }
