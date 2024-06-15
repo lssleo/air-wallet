@@ -1,28 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Network } from './network.entity';
+import { PrismaService } from '../prisma/prisma.service'
+import { network } from '@prisma/client';
+
 
 @Injectable()
 export class NetworksService {
-    constructor(
-        @InjectRepository(Network)
-        private networksRepository: Repository<Network>,
-    ) {}
+    constructor(private prisma: PrismaService) {}
 
-    findAll(): Promise<Network[]> {
-        return this.networksRepository.find()
+    findAll(): Promise<network[]> {
+        return this.prisma.network.findMany()
     }
 
-    findOneById(id: number): Promise<Network> {
-        return this.networksRepository.findOneBy({ id })
+    findOneById(id: number): Promise<network> {
+        return this.prisma.network.findUnique({ where: { id } })
     }
-  
-    async create(network: Network): Promise<Network> {
-        return this.networksRepository.save(network)
+
+    async create(data: network): Promise<network> {
+        return this.prisma.network.create({ data })
     }
 
     async remove(id: number): Promise<void> {
-        await this.networksRepository.delete(id)
+        await this.prisma.network.delete({ where: { id } })
     }
 }

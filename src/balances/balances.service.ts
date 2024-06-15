@@ -1,70 +1,59 @@
 import { Injectable } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
-import { Balance } from './balance.entity'
-import { Wallet } from '../wallets/wallet.entity'
-import { Network } from '../networks/network.entity'
+import { PrismaService } from '../prisma/prisma.service'
 
 @Injectable()
 export class BalancesService {
-    constructor(
-        @InjectRepository(Balance)
-        private balancesRepository: Repository<Balance>,
-        @InjectRepository(Wallet)
-        private walletsRepository: Repository<Wallet>,
-    ) {}
+    constructor(private readonly prisma: PrismaService) {}
 
-    async addBalance(
-        wallet: Wallet,
-        network: Network,
-        currency: string,
-        amount: string,
-    ): Promise<Balance> {
-        const newBalance = this.balancesRepository.create({ wallet, network, currency, amount })
-        return this.balancesRepository.save(newBalance)
+    async addBalance(walletId: number, networkId: number, currency: string, amount: string) {
+        return this.prisma.balance.create({
+            data: {
+                walletId,
+                networkId,
+                currency,
+                amount,
+            },
+        })
     }
 
-    async updateBalance(
-        wallet: Wallet,
-        network: Network,
-        currency: string,
-        amount: string,
-    ): Promise<Balance> {
-        const balance = await this.balancesRepository.findOne({
-            where: { wallet, network, currency },
+    async updateBalance(walletId: number, networkId: number, currency: string, amount: string) {
+        const balance = await this.prisma.balance.findFirst({
+            where: { walletId, networkId, currency },
         })
         if (balance) {
-            balance.amount = amount
-            return this.balancesRepository.save(balance)
+            return this.prisma.balance.update({
+                where: { id: balance.id },
+                data: { amount },
+            })
         }
-        return this.addBalance(wallet, network, currency, amount)
+        return this.addBalance(walletId, networkId, currency, amount)
     }
 
-    async findWalletForUser(userId: number, walletId: number): Promise<Wallet> {
-        return this.walletsRepository.findOne({
-            where: { id: walletId, user: { id: userId } },
+    async findWalletForUser(userId: number, walletId: number) {
+        return this.prisma.wallet.findFirst({
+            where: { id: walletId, userId },
         })
     }
 
-    async findForWalletAndCurrency(walletId: number, currency: string): Promise<Balance> {
-        return this.balancesRepository.findOne({
-            where: { wallet: { id: walletId }, currency },
+    async findForWalletAndCurrency(walletId: number, currency: string) {
+        return this.prisma.balance.findFirst({
+            where: { walletId, currency },
         })
     }
 
-    async deleteBalance(wallet: Wallet, network: Network, currency: string): Promise<void> {
-        const balance = await this.balancesRepository.findOne({
-            where: { wallet, network, currency },
+    async deleteBalance(walletId: number, networkId: number, currency: string) {
+        return this.prisma.balance.deleteMany({
+            where: { walletId, networkId, currency },
         })
-        if (balance) {
-            await this.balancesRepository.remove(balance)
-        }
     }
 
-    async findAllForWallet(wallet: Wallet): Promise<Balance[]> {
-        return this.balancesRepository.find({
-            where: { wallet: { id: wallet.id } },
-            relations: ['wallet', 'network'], // can be removed
+    async findAllForWallet(walletId: number) {
+        return this.prisma.balance.findMany({
+            where: { walletId },
+            include: {
+                wallet: true,
+                network: true,
+            },
         })
     }
 }
