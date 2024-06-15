@@ -10,6 +10,8 @@ export class BalancesService {
     constructor(
         @InjectRepository(Balance)
         private balancesRepository: Repository<Balance>,
+        @InjectRepository(Wallet)
+        private walletsRepository: Repository<Wallet>,
     ) {}
 
     async addBalance(
@@ -36,6 +38,18 @@ export class BalancesService {
             return this.balancesRepository.save(balance)
         }
         return this.addBalance(wallet, network, currency, amount)
+    }
+
+    async findWalletForUser(userId: number, walletId: number): Promise<Wallet> {
+        return this.walletsRepository.findOne({
+            where: { id: walletId, user: { id: userId } },
+        })
+    }
+
+    async findForWalletAndCurrency(walletId: number, currency: string): Promise<Balance> {
+        return this.balancesRepository.findOne({
+            where: { wallet: { id: walletId }, currency },
+        })
     }
 
     async deleteBalance(wallet: Wallet, network: Network, currency: string): Promise<void> {

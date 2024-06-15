@@ -6,6 +6,6 @@ import { Network } from './network.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([Network])],
   providers: [NetworksService],
-  exports: [NetworksService],
+  exports: [NetworksService, TypeOrmModule],
 })
 export class NetworksModule {}
