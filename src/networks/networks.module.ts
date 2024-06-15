@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { NetworksService } from './networks.service';
-import { Network } from './network.entity';
+import { PrismaModule } from '../prisma/prisma.module'
+
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Network])],
-  providers: [NetworksService],
-  exports: [NetworksService, TypeOrmModule],
+    imports: [PrismaModule],
+    providers: [NetworksService],
+    exports: [NetworksService],
 })
+  
 export class NetworksModule {}

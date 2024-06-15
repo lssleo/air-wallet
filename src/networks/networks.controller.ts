@@ -1,28 +1,28 @@
 import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { NetworksService } from './networks.service';
-import { Network } from './network.entity';
+import { network } from '@prisma/client';
 
 @Controller('networks')
 export class NetworksController {
-  constructor(private readonly networksService: NetworksService) {}
+    constructor(private readonly networksService: NetworksService) {}
 
-  @Get()
-  findAll(): Promise<Network[]> {
-    return this.networksService.findAll();
-  }
+    @Get()
+    findAll(): Promise<network[]> {
+        return this.networksService.findAll()
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string): Promise<Network> {
-    return this.networksService.findOneById(+id);
-  }
+    @Get(':id')
+    findOne(@Param('id') id: string): Promise<network> {
+        return this.networksService.findOneById(+id)
+    }
 
-  @Post()
-  create(@Body() network: Network): Promise<Network> {
-    return this.networksService.create(network);
-  }
+    @Post()
+    create(@Body() network: network): Promise<network> {
+        return this.networksService.create(network)
+    }
 
-  @Delete(':id')
-  remove(@Param('id') id: string): Promise<void> {
-    return this.networksService.remove(+id);
-  }
+    @Delete(':id')
+    remove(@Param('id') id: string): Promise<void> {
+        return this.networksService.remove(+id)
+    }
 }

@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common'
-import { TypeOrmModule } from '@nestjs/typeorm'
 import { TokensService } from './tokens.service'
 import { TokensController } from './tokens.controller'
-import { Token } from './token.entity'
+import { PrismaModule } from '../prisma/prisma.module'
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Token])],
+    imports: [PrismaModule],
     providers: [TokensService],
     controllers: [TokensController],
 })
