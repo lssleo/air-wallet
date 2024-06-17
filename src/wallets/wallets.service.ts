@@ -6,6 +6,7 @@ import { ethers } from 'ethers'
 import { BalancesService } from 'src/balances/balances.service'
 import { TokensService } from 'src/tokens/tokens.service'
 import { erc20Abi } from 'src/abi/erc20'
+import { BadRequestException } from '@nestjs/common'
 
 import * as crypto from 'crypto-js'
 
@@ -64,6 +65,35 @@ export class WalletsService {
                 }
             }
         }
+    }
+
+    async sendTransaction(
+        walletId: number,
+        recipientAddress: string,
+        amount: string,
+        networkName: string,
+    ): Promise<string> {
+        const wallet = await this.findOne(walletId)
+        if (!wallet) throw new NotFoundException('Wallet not found')
+
+        const network = await this.prisma.network.findFirst({
+            where: { name: networkName.toLowerCase() },
+        })
+        if (!network) throw new NotFoundException('Network not found')
+
+        const rpcUrl = this.configService.get<string>(`${network.name.toUpperCase()}_RPC_URL`)
+        if (!rpcUrl) throw new BadRequestException('RPC URL not configured for this network')
+
+        const provider = new ethers.JsonRpcProvider(rpcUrl)
+        const decryptedPrivateKey = this.decryptPrivateKey(wallet.encryptedPrivateKey)
+        const walletSigner = new ethers.Wallet(decryptedPrivateKey, provider)
+
+        const tx = await walletSigner.sendTransaction({
+            to: recipientAddress,
+            value: ethers.parseEther(amount),
+        })
+
+        return tx.hash
     }
 
     async remove(id: number): Promise<void> {

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { ethers } from 'ethers'
+import { EventLog, ethers } from 'ethers'
 import { ConfigService } from '@nestjs/config'
 import { WalletsService } from '../wallets/wallets.service'
 import { BalancesService } from '../balances/balances.service'
@@ -58,12 +58,14 @@ export class TransactionsService {
                     wallets.map((wallet) => wallet.address),
                 )
 
-                erc20Contract.on(filterFrom, async (from, to, value, event) => {
-                    await this.updateTokenBalance(networkEntity, token, from)
+                erc20Contract.on(filterFrom, async (log: EventLog) => {
+                    const addressFrom = log.args[0]
+                    await this.updateTokenBalance(networkEntity, token, addressFrom)
                 })
 
-                erc20Contract.on(filterTo, async (from, to, value, event) => {
-                    await this.updateTokenBalance(networkEntity, token, to)
+                erc20Contract.on(filterTo, async (log: EventLog) => {
+                    const addressTo = log.args[1]
+                    await this.updateTokenBalance(networkEntity, token, addressTo)
                 })
             }
         }
