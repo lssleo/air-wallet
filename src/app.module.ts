@@ -11,10 +11,12 @@ import { TransactionsModule } from './transactions/transactions.module'
 import { MailService } from './common/mail.service.ts'
 import { TokensModule } from './tokens/tokens.module'
 import { PrismaSeedService } from './prisma/prisma-seed.service'
+import { EventEmitterModule } from '@nestjs/event-emitter'
 
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true }),
+        EventEmitterModule.forRoot(),
         PrismaModule,
         AuthModule,
         UsersModule,

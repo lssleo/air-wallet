@@ -3,6 +3,7 @@ import { BalancesService } from './balances.service'
 import { WalletsService } from '../wallets/wallets.service'
 import { AuthGuard } from '@nestjs/passport'
 import { user } from '@prisma/client'
+import { ParseIntPipe } from '@nestjs/common'
 
 @Controller('balances')
 export class BalancesController {
@@ -13,7 +14,7 @@ export class BalancesController {
 
     @UseGuards(AuthGuard('jwt'))
     @Get('wallet/:walletId')
-    async findAllForWallet(@Request() req, @Param('walletId') walletId: number) {
+    async findAllForWallet(@Request() req, @Param('walletId', ParseIntPipe) walletId: number) {
         const user: user = req.user
         const wallet = await this.walletsService.findOneForUser(user.id, walletId)
         if (wallet) {
@@ -26,7 +27,7 @@ export class BalancesController {
     @Get('wallet/:walletId/currency/:currency')
     async findForWalletAndCurrency(
         @Request() req,
-        @Param('walletId') walletId: number,
+        @Param('walletId', ParseIntPipe) walletId: number,
         @Param('currency') currency: string,
     ) {
         const userId = req.user.id

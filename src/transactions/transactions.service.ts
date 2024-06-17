@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service'
 import { TokensService } from 'src/tokens/tokens.service'
 import { token, network } from '@prisma/client'
 import { erc20Abi } from 'src/abi/erc20'
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 
 @Injectable()
 export class TransactionsService {
@@ -18,6 +19,7 @@ export class TransactionsService {
         private walletsService: WalletsService,
         private balancesService: BalancesService,
         private tokensService: TokensService,
+        private eventEmitter: EventEmitter2,
     ) {
         this.providers = {
             ethereum: new ethers.JsonRpcProvider(
@@ -25,6 +27,15 @@ export class TransactionsService {
             ),
             polygon: new ethers.JsonRpcProvider(this.configService.get<string>('POLYGON_RPC_URL')),
         }
+    }
+
+    @OnEvent('wallets.changed')
+    async handleWalletsChanged() {
+        await this.startListening()
+    }
+    @OnEvent('tokens.changed')
+    async handleTokensChanged() {
+        await this.startListening()
     }
 
     async startListening() {
@@ -38,7 +49,7 @@ export class TransactionsService {
                 console.error(`Provider for network ${networkEntity.name} not found`)
                 continue
             }
-
+            provider.removeAllListeners()
             provider.on('block', async (blockNumber) => {
                 const block = await provider.getBlock(blockNumber, true)
                 for (const transaction of block.prefetchedTransactions) {
@@ -58,6 +69,7 @@ export class TransactionsService {
                     wallets.map((wallet) => wallet.address),
                 )
 
+                erc20Contract.removeAllListeners()
                 erc20Contract.on(filterFrom, async (log: EventLog) => {
                     const addressFrom = log.args[0]
                     await this.updateTokenBalance(networkEntity, token, addressFrom)
@@ -66,6 +78,8 @@ export class TransactionsService {
                 erc20Contract.on(filterTo, async (log: EventLog) => {
                     const addressTo = log.args[1]
                     await this.updateTokenBalance(networkEntity, token, addressTo)
+                    console.log('EVENT EMITTED')
+                    console.log(addressTo)
                 })
             }
         }
