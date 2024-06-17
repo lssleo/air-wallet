@@ -7,7 +7,7 @@ import { PrismaService } from '../prisma/prisma.service'
 import { TokensService } from 'src/tokens/tokens.service'
 import { token, network } from '@prisma/client'
 import { erc20Abi } from 'src/abi/erc20'
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
+import { OnEvent } from '@nestjs/event-emitter'
 
 @Injectable()
 export class TransactionsService {
@@ -19,7 +19,6 @@ export class TransactionsService {
         private walletsService: WalletsService,
         private balancesService: BalancesService,
         private tokensService: TokensService,
-        private eventEmitter: EventEmitter2,
     ) {
         this.providers = {
             ethereum: new ethers.JsonRpcProvider(
@@ -78,8 +77,6 @@ export class TransactionsService {
                 erc20Contract.on(filterTo, async (log: EventLog) => {
                     const addressTo = log.args[1]
                     await this.updateTokenBalance(networkEntity, token, addressTo)
-                    console.log('EVENT EMITTED')
-                    console.log(addressTo)
                 })
             }
         }
