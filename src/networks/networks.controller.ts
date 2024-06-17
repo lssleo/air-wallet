@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common'
 import { NetworksService } from './networks.service'
 import { network } from '@prisma/client'
+import { ParseIntPipe } from '@nestjs/common'
 
 @Controller('networks')
 export class NetworksController {
@@ -12,8 +13,8 @@ export class NetworksController {
     }
 
     @Delete(':id')
-    remove(@Param('id') id: string): Promise<void> {
-        return this.networksService.remove(+id)
+    remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+        return this.networksService.remove(id)
     }
 
     @Get()
@@ -22,7 +23,7 @@ export class NetworksController {
     }
 
     @Get(':id')
-    findOne(@Param('id') id: string): Promise<network> {
-        return this.networksService.findOneById(+id)
+    findOne(@Param('id', ParseIntPipe) id: number): Promise<network> {
+        return this.networksService.findOneById(id)
     }
 }
