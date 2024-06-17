@@ -8,10 +8,12 @@ import {
     Delete,
     Patch,
     NotFoundException,
+    Body,
 } from '@nestjs/common'
 import { WalletsService } from './wallets.service'
 import { AuthGuard } from '@nestjs/passport'
 import { user } from '@prisma/client'
+import { ParseIntPipe } from '@nestjs/common'
 
 @Controller('wallets')
 export class WalletsController {
@@ -26,15 +28,40 @@ export class WalletsController {
 
     @UseGuards(AuthGuard('jwt'))
     @Patch(':id/update-balances')
-    async update(@Request() req, @Param('id') id: number) {
+    async update(@Request() req, @Param('id', ParseIntPipe) id: number) {
         const user = req.user
-        const wallet = await this.walletsService.findOneForUser(user, id)
+        const wallet = await this.walletsService.findOneForUser(user.id, id)
 
         if (!wallet || wallet.userId !== user.id) {
             throw new NotFoundException('Wallet not found or access denied')
         }
 
         await this.walletsService.updateBalances(wallet.id)
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Post(':id/send')
+    async sendTransaction(
+        @Request() req,
+        @Param('id', ParseIntPipe) id: number,
+        @Body('recipientAddress') recipientAddress: string,
+        @Body('amount') amount: string,
+        @Body('networkName') networkName: string,
+    ) {
+        const user = req.user
+        const wallet = await this.walletsService.findOneForUser(user.id, id)
+
+        if (!wallet || wallet.userId !== user.id) {
+            throw new NotFoundException('Wallet not found or access denied')
+        }
+
+        const txHash = await this.walletsService.sendTransaction(
+            wallet.id,
+            recipientAddress,
+            amount,
+            networkName,
+        )
+        return { txHash }
     }
 
     @UseGuards(AuthGuard('jwt'))
