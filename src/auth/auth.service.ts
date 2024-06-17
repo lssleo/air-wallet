@@ -12,15 +12,6 @@ export class AuthService {
         private sessionsService: SessionsService,
     ) {}
 
-    async validateUser(email: string, password: string): Promise<any> {
-        const user = await this.usersService.findByEmail(email)
-        if (user && (await bcrypt.compare(password, user.password))) {
-            const { password, ...result } = user
-            return result
-        }
-        return null
-    }
-
     async login(user: any, ip: string, userAgent: string) {
         const expiresIn = Number(process.env.EXPIRATION) // Session expiration time in seconds, should match with JWT token
         const session = await this.sessionsService.createSession(user, ip, userAgent, expiresIn)
@@ -31,6 +22,15 @@ export class AuthService {
         }
     }
 
+    async validateUser(email: string, password: string): Promise<any> {
+        const user = await this.usersService.findByEmail(email)
+        if (user && (await bcrypt.compare(password, user.password))) {
+            const { password, ...result } = user
+            return result
+        }
+        return null
+    }
+    
     async validate(payload: any) {
         const user = await this.usersService.findOne(payload.sub)
         if (!user) {

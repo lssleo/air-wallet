@@ -30,6 +30,13 @@ export class SessionsService {
         })
     }
 
+    async closeSession(sessionId: number): Promise<void> {
+        await this.prisma.session.update({
+            where: { id: sessionId },
+            data: { isActive: false },
+        })
+    }
+
     async findActiveSession(user: user, sessionId: number): Promise<session> {
         return this.prisma.session.findFirst({
             where: {
@@ -40,13 +47,6 @@ export class SessionsService {
                     gt: new Date(),
                 },
             },
-        })
-    }
-
-    async closeSession(sessionId: number): Promise<void> {
-        await this.prisma.session.update({
-            where: { id: sessionId },
-            data: { isActive: false },
         })
     }
 }
