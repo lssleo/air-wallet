@@ -68,7 +68,7 @@ export class WalletsController {
     @Delete(':id')
     async remove(@Request() req, @Param('id', ParseIntPipe) id: number) {
         const user = req.user
-        const wallet = await this.walletsService.findOneForUser(user, id)
+        const wallet = await this.walletsService.findOneForUser(user.id, id)
 
         if (!wallet || wallet.userId !== user.id) {
             throw new NotFoundException('Wallet not found or access denied')
@@ -88,6 +88,6 @@ export class WalletsController {
     @Get(':id')
     async findOneForUser(@Request() req, @Param('id', ParseIntPipe) id: number) {
         const user: user = req.user
-        return this.walletsService.findOneForUser(user.id, id)
+        return await this.walletsService.findOneForUser(user.id, id)
     }
 }
