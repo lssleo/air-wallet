@@ -33,21 +33,6 @@ export class WalletsService {
         })
     }
 
-    async remove(id: number): Promise<void> {
-        await this.prisma.wallet.delete({ where: { id } })
-    }
-
-    private encryptPrivateKey(privateKey: string): string {
-        const encrypted = crypto.AES.encrypt(privateKey, process.env.ENCRYPTION_KEY).toString()
-        return encrypted
-    }
-
-    private decryptPrivateKey(encryptedPrivateKey: string): string {
-        const bytes = crypto.AES.decrypt(encryptedPrivateKey, process.env.ENCRYPTION_KEY)
-        const decrypted = bytes.toString(crypto.enc.Utf8)
-        return decrypted
-    }
-
     async updateBalances(id: number): Promise<void> {
         const wallet = await this.findOne(id)
         if (!wallet) throw new NotFoundException('Wallet not found')
@@ -79,6 +64,21 @@ export class WalletsService {
                 }
             }
         }
+    }
+
+    async remove(id: number): Promise<void> {
+        await this.prisma.wallet.delete({ where: { id } })
+    }
+
+    private encryptPrivateKey(privateKey: string): string {
+        const encrypted = crypto.AES.encrypt(privateKey, process.env.ENCRYPTION_KEY).toString()
+        return encrypted
+    }
+
+    private decryptPrivateKey(encryptedPrivateKey: string): string {
+        const bytes = crypto.AES.decrypt(encryptedPrivateKey, process.env.ENCRYPTION_KEY)
+        const decrypted = bytes.toString(crypto.enc.Utf8)
+        return decrypted
     }
 
     async findOne(walletId: number): Promise<wallet> {
