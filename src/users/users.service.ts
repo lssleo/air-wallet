@@ -13,20 +13,6 @@ export class UsersService {
         private mailService: MailService,
     ) {}
 
-    findAll(): Promise<user[]> {
-        return this.prisma.user.findMany()
-    }
-
-    findOne(id: number): Promise<user> {
-        return this.prisma.user.findUnique({ where: { id } })
-    }
-
-    findByEmail(email: string): Promise<user> {
-        return this.prisma.user.findFirst({
-            where: { email },
-        })
-    }
-
     async create(createUserDto: CreateUserDto): Promise<user> {
         const salt = await bcrypt.genSalt()
         const hashedPassword = await bcrypt.hash(createUserDto.password, salt)
@@ -59,10 +45,6 @@ export class UsersService {
         }
     }
 
-    async remove(id: number): Promise<void> {
-        await this.prisma.user.delete({ where: { id } })
-    }
-
     async verifyEmail(email: string, code: string): Promise<boolean> {
         const user = await this.findByEmail(email)
         if (user && user.verificationCode === code) {
@@ -73,5 +55,23 @@ export class UsersService {
             return true
         }
         return false
+    }
+
+    async remove(id: number): Promise<void> {
+        await this.prisma.user.delete({ where: { id } })
+    }
+
+    findAll(): Promise<user[]> {
+        return this.prisma.user.findMany()
+    }
+
+    findOne(id: number): Promise<user> {
+        return this.prisma.user.findUnique({ where: { id } })
+    }
+
+    findByEmail(email: string): Promise<user> {
+        return this.prisma.user.findFirst({
+            where: { email },
+        })
     }
 }

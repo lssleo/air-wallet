@@ -29,6 +29,12 @@ export class BalancesService {
         return this.addBalance(walletId, networkId, currency, amount)
     }
 
+    async deleteBalance(walletId: number, networkId: number, currency: string) {
+        return this.prisma.balance.deleteMany({
+            where: { walletId, networkId, currency },
+        })
+    }
+
     async findWalletForUser(userId: number, walletId: number) {
         return this.prisma.wallet.findFirst({
             where: { id: walletId, userId },
@@ -38,12 +44,6 @@ export class BalancesService {
     async findForWalletAndCurrency(walletId: number, currency: string) {
         return this.prisma.balance.findFirst({
             where: { walletId, currency },
-        })
-    }
-
-    async deleteBalance(walletId: number, networkId: number, currency: string) {
-        return this.prisma.balance.deleteMany({
-            where: { walletId, networkId, currency },
         })
     }
 
