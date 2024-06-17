@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Param, Delete, UseGuards } from '@nestjs/c
 import { UsersService } from './users.service'
 import { CreateUserDto } from './dto/create-user.dto'
 import { AuthGuard } from '@nestjs/passport'
+import { ParseIntPipe } from '@nestjs/common'
 
 @Controller('users')
 export class UsersController {
@@ -15,7 +16,7 @@ export class UsersController {
 
     @UseGuards(AuthGuard('jwt'))
     @Get(':id')
-    findOne(@Param('id') id: number) {
+    findOne(@Param('id', ParseIntPipe) id: number) {
         return this.usersService.findOne(id)
     }
 
@@ -36,7 +37,7 @@ export class UsersController {
 
     @UseGuards(AuthGuard('jwt'))
     @Delete(':id')
-    remove(@Param('id') id: number) {
+    remove(@Param('id', ParseIntPipe) id: number) {
         return this.usersService.remove(id)
     }
 }

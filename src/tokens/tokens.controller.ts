@@ -3,6 +3,7 @@ import { TokensService } from './tokens.service'
 import { ApiKeyGuard } from '../auth/api-key.guard'
 import { AddTokenDto } from './dto/add-token.dto'
 import { UpdateTokenDto } from './dto/update-token.dto'
+import { ParseIntPipe } from '@nestjs/common'
 
 @Controller('tokens')
 export class TokensController {
@@ -16,13 +17,13 @@ export class TokensController {
 
     @UseGuards(ApiKeyGuard)
     @Patch(':id')
-    async update(@Param('id') id: number, @Body() updateTokenDto: UpdateTokenDto) {
+    async update(@Param('id', ParseIntPipe) id: number, @Body() updateTokenDto: UpdateTokenDto) {
         return this.tokensService.update(id, updateTokenDto)
     }
 
     @UseGuards(ApiKeyGuard)
     @Delete(':id')
-    async remove(@Param('id') id: number) {
+    async remove(@Param('id', ParseIntPipe) id: number) {
         return this.tokensService.remove(id)
     }
 

@@ -66,7 +66,7 @@ export class WalletsController {
 
     @UseGuards(AuthGuard('jwt'))
     @Delete(':id')
-    async remove(@Request() req, @Param('id') id: number) {
+    async remove(@Request() req, @Param('id', ParseIntPipe) id: number) {
         const user = req.user
         const wallet = await this.walletsService.findOneForUser(user, id)
 
@@ -86,7 +86,7 @@ export class WalletsController {
 
     @UseGuards(AuthGuard('jwt'))
     @Get(':id')
-    async findOneForUser(@Request() req, @Param('id') id: number) {
+    async findOneForUser(@Request() req, @Param('id', ParseIntPipe) id: number) {
         const user: user = req.user
         return this.walletsService.findOneForUser(user.id, id)
     }

@@ -7,6 +7,7 @@ import { BalancesService } from 'src/balances/balances.service'
 import { TokensService } from 'src/tokens/tokens.service'
 import { erc20Abi } from 'src/abi/erc20'
 import { BadRequestException } from '@nestjs/common'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 
 import * as crypto from 'crypto-js'
 
@@ -17,6 +18,7 @@ export class WalletsService {
         private readonly configService: ConfigService,
         private balancesService: BalancesService,
         private tokensService: TokensService,
+        private eventEmitter: EventEmitter2,
     ) {}
 
     async createWallet(user: user): Promise<wallet> {
@@ -25,13 +27,17 @@ export class WalletsService {
         const privateKey = wallet.privateKey
         const encryptedPrivateKey = this.encryptPrivateKey(privateKey)
 
-        return this.prisma.wallet.create({
+        const newWallet = this.prisma.wallet.create({
             data: {
                 address: address,
                 encryptedPrivateKey: encryptedPrivateKey,
                 userId: user.id,
             },
         })
+
+        this.eventEmitter.emit('wallets.changed')
+
+        return newWallet
     }
 
     async updateBalances(id: number): Promise<void> {
@@ -98,6 +104,7 @@ export class WalletsService {
 
     async remove(id: number): Promise<void> {
         await this.prisma.wallet.delete({ where: { id } })
+         this.eventEmitter.emit('wallets.changed')
     }
 
     private encryptPrivateKey(privateKey: string): string {
