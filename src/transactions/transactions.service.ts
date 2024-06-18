@@ -198,44 +198,4 @@ export class TransactionsService {
             )
         }
     }
-
-    // @OnEvent('wallet.removed')
-    // async handleWalletRemoved(wallet: wallet) {
-    //     this.wallets = this.wallets.filter((w) => w.address !== wallet.address)
-    //     await this.removeWalletListeners(wallet)
-    // }
-
-    // @OnEvent('token.removed')
-    // async handleTokenRemoved(token: token) {
-    //     this.tokens = this.tokens.filter((t) => t.address !== token.address)
-    //     await this.removeTokenListeners(token)
-    // }
-
-    // async removeWalletListeners(wallet: wallet) {
-    //     const networks = await this.prisma.network.findMany()
-    //     for (const networkEntity of networks) {
-    //         const provider = this.providers[networkEntity.name.toLowerCase()]
-    //         if (!provider) {
-    //             console.error(`Provider for network ${networkEntity.name} not found`)
-    //             continue
-    //         }
-
-    //         for (const token of this.tokens.filter((t) => t.network === networkEntity.name)) {
-    //             const erc20Contract = new ethers.Contract(token.address, erc20Abi, provider)
-    //             const filterFrom = erc20Contract.filters.Transfer(wallet.address, null)
-    //             const filterTo = erc20Contract.filters.Transfer(null, wallet.address)
-
-    //             erc20Contract.off(filterFrom)
-    //             erc20Contract.off(filterTo)
-    //         }
-    //     }
-    // }
-
-    // async removeTokenListeners(token: token) {
-    //     const provider = this.providers[token.network.toLowerCase()]
-    //     if (!provider) return
-
-    //     const erc20Contract = new ethers.Contract(token.address, erc20Abi, provider)
-    //     erc20Contract.removeAllListeners()
-    // }
 }

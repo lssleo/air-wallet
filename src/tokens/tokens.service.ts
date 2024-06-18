@@ -40,14 +40,11 @@ export class TokensService {
             },
         })
 
-        this.eventEmitter.emit('token.changed')
-
         return token
     }
 
     async remove(id: number): Promise<void> {
-        const removedToken = await this.prisma.token.delete({ where: { id } })
-        this.eventEmitter.emit('token.removed', removedToken)
+        await this.prisma.token.delete({ where: { id } })
     }
 
     async findAllTokens(): Promise<token[]> {

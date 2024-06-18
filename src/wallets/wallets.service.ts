@@ -103,8 +103,7 @@ export class WalletsService {
     }
 
     async remove(id: number): Promise<void> {
-        const removedWallet = await this.prisma.wallet.delete({ where: { id } })
-        this.eventEmitter.emit('wallet.removed', removedWallet)
+        await this.prisma.wallet.delete({ where: { id } })
     }
 
     private encryptPrivateKey(privateKey: string): string {
