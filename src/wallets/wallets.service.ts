@@ -27,7 +27,7 @@ export class WalletsService {
         const privateKey = wallet.privateKey
         const encryptedPrivateKey = this.encryptPrivateKey(privateKey)
 
-        const newWallet = this.prisma.wallet.create({
+        const newWallet = await this.prisma.wallet.create({
             data: {
                 address: address,
                 encryptedPrivateKey: encryptedPrivateKey,
@@ -35,7 +35,7 @@ export class WalletsService {
             },
         })
 
-        this.eventEmitter.emit('wallets.changed')
+        this.eventEmitter.emit('wallet.added', newWallet)
 
         return newWallet
     }
@@ -103,8 +103,8 @@ export class WalletsService {
     }
 
     async remove(id: number): Promise<void> {
-        await this.prisma.wallet.delete({ where: { id } })
-         this.eventEmitter.emit('wallets.changed')
+        const removedWallet = await this.prisma.wallet.delete({ where: { id } })
+        this.eventEmitter.emit('wallet.removed', removedWallet)
     }
 
     private encryptPrivateKey(privateKey: string): string {
