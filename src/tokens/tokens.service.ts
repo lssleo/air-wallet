@@ -13,7 +13,7 @@ export class TokensService {
     ) {}
 
     async addToken(addTokenDto: AddTokenDto): Promise<token> {
-        const token = this.prisma.token.create({
+        const token = await this.prisma.token.create({
             data: {
                 name: addTokenDto.name,
                 symbol: addTokenDto.symbol,
@@ -23,7 +23,7 @@ export class TokensService {
             },
         })
 
-        this.eventEmitter.emit('tokens.changed')
+        this.eventEmitter.emit('token.added', token)
 
         return token
     }
@@ -40,17 +40,23 @@ export class TokensService {
             },
         })
 
-        this.eventEmitter.emit('tokens.changed')
+        this.eventEmitter.emit('token.changed')
 
         return token
     }
 
     async remove(id: number): Promise<void> {
-        await this.prisma.token.delete({ where: { id } })
-        this.eventEmitter.emit('tokens.changed')
+        const removedToken = await this.prisma.token.delete({ where: { id } })
+        this.eventEmitter.emit('token.removed', removedToken)
     }
 
     async findAllTokens(): Promise<token[]> {
         return this.prisma.token.findMany()
+    }
+
+    async findOne(tokenId: number): Promise<token> {
+        return this.prisma.token.findUnique({
+            where: { id: tokenId },
+        })
     }
 }

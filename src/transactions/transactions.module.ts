@@ -22,6 +22,6 @@ export class TransactionsModule implements OnModuleInit {
 
     async onModuleInit() {
         // console.log('LISTENING BLOCKCHAIN IS OFF in transactions.module.ts')
-        await this.transactionsService.startListening()
+        await this.transactionsService.initialize()
     }
 }
