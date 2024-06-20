@@ -67,6 +67,7 @@ export class UsersService {
 
     findOne(id: number): Promise<user> {
         return this.prisma.user.findUnique({ where: { id } })
+        // return this.prisma.user.findUnique({ select: [],where: { id } })
     }
 
     findByEmail(email: string): Promise<user> {
