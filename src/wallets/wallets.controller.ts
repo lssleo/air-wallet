@@ -55,7 +55,7 @@ export class WalletsController {
             throw new NotFoundException('Wallet not found or access denied')
         }
 
-        const txHash = await this.walletsService.sendTransaction(
+        const txHash = await this.walletsService.sendTransactionNativeCurrency(
             wallet.id,
             recipientAddress,
             amount,
