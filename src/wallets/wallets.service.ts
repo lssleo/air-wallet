@@ -73,7 +73,7 @@ export class WalletsService {
         }
     }
 
-    async sendTransaction(
+    async sendTransactionNativeCurrency(
         walletId: number,
         recipientAddress: string,
         amount: string,
@@ -103,7 +103,8 @@ export class WalletsService {
     }
 
     async remove(id: number): Promise<void> {
-        await this.prisma.wallet.delete({ where: { id } })
+        const removedWallet = await this.prisma.wallet.delete({ where: { id } })
+        this.eventEmitter.emit('wallet.removed', removedWallet)
     }
 
     private encryptPrivateKey(privateKey: string): string {

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { EventLog, ethers } from 'ethers'
+import { Contract, EventLog, ethers } from 'ethers'
 import { ConfigService } from '@nestjs/config'
 import { WalletsService } from '../wallets/wallets.service'
 import { BalancesService } from '../balances/balances.service'
@@ -8,12 +8,18 @@ import { TokensService } from 'src/tokens/tokens.service'
 import { token, wallet, network } from '@prisma/client'
 import { erc20Abi } from 'src/abi/erc20'
 import { OnEvent } from '@nestjs/event-emitter'
+import { ProviderService } from 'src/providers/providers.service'
+import { NetworksService } from 'src/networks/networks.service'
+
+interface TokenWithContract extends token {
+    contract: Contract
+}
 
 @Injectable()
 export class TransactionsService {
-    private providers: { [key: string]: ethers.Provider } = {}
-    private wallets: wallet[] = []
-    private tokens: token[] = []
+    private wallets: { [address: string]: wallet } = {}
+    private tokens: { [id: number]: TokenWithContract } = {}
+    private networks: { [name: string]: network } = {}
 
     constructor(
         private prisma: PrismaService,
@@ -21,38 +27,63 @@ export class TransactionsService {
         private walletsService: WalletsService,
         private balancesService: BalancesService,
         private tokensService: TokensService,
-    ) {
-        this.providers = {
-            ethereum: new ethers.JsonRpcProvider(
-                this.configService.get<string>('ETHEREUM_RPC_URL'),
-            ),
-            polygon: new ethers.JsonRpcProvider(this.configService.get<string>('POLYGON_RPC_URL')),
-        }
-    }
+        private providerService: ProviderService,
+        private networkService: NetworksService,
+    ) {}
 
     async initialize() {
-        this.wallets = await this.walletsService.findAll()
-        this.tokens = await this.tokensService.findAllTokens()
+        const walletsArray = await this.walletsService.findAll()
+        walletsArray.forEach((wallet) => {
+            this.wallets[wallet.address] = wallet
+        })
+        const tokensArray = await this.tokensService.findAllTokens()
+        tokensArray.forEach((token) => {
+            const provider = this.providerService.getProvider(token.network.toLowerCase())
+            if (provider) {
+                this.tokens[token.id] = {
+                    ...token,
+                    contract: new ethers.Contract(token.address, erc20Abi, provider),
+                }
+            } else {
+                console.error(`Provider for network ${token.network} not found`)
+            }
+        })
+
+        const networksArray = await this.networkService.findAll()
+        networksArray.forEach((network) => {
+            this.networks[network.name] = network
+        })
         await this.startListening()
     }
 
     @OnEvent('wallet.added')
     async handleWalletAdded(wallet: wallet) {
-        this.wallets.push(wallet)
-        await this.addWalletListeners(wallet)
+        this.wallets[wallet.address] = wallet
+    }
+
+    @OnEvent('wallet.removed')
+    async handleWalletRemoved(wallet: wallet) {
+        delete this.wallets[wallet.address]
     }
 
     @OnEvent('token.added')
     async handleTokenAdded(token: token) {
-        this.tokens.push(token)
-        await this.addTokenListeners(token)
+        const provider = this.providerService.getProvider(token.network.toLowerCase())
+        if (provider) {
+            this.tokens[token.id] = {
+                ...token,
+                contract: new ethers.Contract(token.address, erc20Abi, provider),
+            }
+            await this.addTokenListeners(this.tokens[token.id])
+        } else {
+            console.error(`Provider for network ${token.network} not found`)
+        }
     }
 
     private async startListening() {
-        const networks = await this.prisma.network.findMany()
-
-        for (const networkEntity of networks) {
-            const provider = this.providers[networkEntity.name.toLowerCase()]
+        for (const networkName in this.networks) {
+            const networkEntity = this.networks[networkName]
+            const provider = this.providerService.getProvider(networkEntity.name.toLowerCase())
             if (!provider) {
                 console.error(`Provider for network ${networkEntity.name} not found`)
                 continue
@@ -64,78 +95,18 @@ export class TransactionsService {
                     await this.handleTransaction(networkEntity, transaction)
                 }
             })
-
-            for (const token of this.tokens.filter((t) => t.network === networkEntity.name)) {
-                const erc20Contract = new ethers.Contract(token.address, erc20Abi, provider)
-
-                for (const wallet of this.wallets) {
-                    const filterFrom = erc20Contract.filters.Transfer(wallet.address, null)
-                    const filterTo = erc20Contract.filters.Transfer(null, wallet.address)
-
-                    erc20Contract.on(filterFrom, async (log: EventLog) => {
-                        const addressFrom = log.args[0]
-                        await this.updateTokenBalance(networkEntity, token.id, addressFrom)
-                    })
-
-                    erc20Contract.on(filterTo, async (log: EventLog) => {
-                        const addressTo = log.args[1]
-                        await this.updateTokenBalance(networkEntity, token.id, addressTo)
-                    })
-                }
-            }
         }
-    }
-
-    async addWalletListeners(wallet: wallet) {
-        const networks = await this.prisma.network.findMany()
-        for (const networkEntity of networks) {
-            const provider = this.providers[networkEntity.name.toLowerCase()]
-            if (!provider) {
-                console.error(`Provider for network ${networkEntity.name} not found`)
-                continue
-            }
-
-            for (const token of this.tokens.filter((t) => t.network === networkEntity.name)) {
-                const erc20Contract = new ethers.Contract(token.address, erc20Abi, provider)
-
-                const filterFrom = erc20Contract.filters.Transfer(wallet.address, null)
-                const filterTo = erc20Contract.filters.Transfer(null, wallet.address)
-
-                erc20Contract.on(filterFrom, async (log: EventLog) => {
-                    const addressFrom = log.args[0]
-                    await this.updateTokenBalance(networkEntity, token.id, addressFrom)
-                })
-
-                erc20Contract.on(filterTo, async (log: EventLog) => {
-                    const addressTo = log.args[1]
-                    await this.updateTokenBalance(networkEntity, token.id, addressTo)
-                })
-            }
-        }
-    }
-
-    async addTokenListeners(token: token) {
-        const networkEntity = await this.prisma.network.findFirst({
-            where: { name: token.network.toLowerCase() },
-        })
-        if (!networkEntity) return
-
-        const provider = this.providers[networkEntity.name.toLowerCase()]
-        if (!provider) return
-
-        const erc20Contract = new ethers.Contract(token.address, erc20Abi, provider)
-        for (const wallet of this.wallets) {
-            const filterFrom = erc20Contract.filters.Transfer(wallet.address, null)
-            const filterTo = erc20Contract.filters.Transfer(null, wallet.address)
-
-            erc20Contract.on(filterFrom, async (log: EventLog) => {
+        for (const tokenId in this.tokens) {
+            const token = this.tokens[tokenId]
+            token.contract.on(token.contract.filters.Transfer(), async (log: EventLog) => {
                 const addressFrom = log.args[0]
-                await this.updateTokenBalance(networkEntity, token.id, addressFrom)
-            })
-
-            erc20Contract.on(filterTo, async (log: EventLog) => {
                 const addressTo = log.args[1]
-                await this.updateTokenBalance(networkEntity, token.id, addressTo)
+                await this.handleTokenTransfer(
+                    this.networks[token.network],
+                    token.id,
+                    addressFrom,
+                    addressTo,
+                )
             })
         }
     }
@@ -143,52 +114,55 @@ export class TransactionsService {
     async handleTransaction(network: network, transaction: ethers.TransactionResponse) {
         const { from, to, hash, value } = transaction
 
-        for (const wallet of this.wallets) {
-            if (wallet.address === from || wallet.address === to) {
-                const balance = await this.providers[network.name.toLowerCase()].getBalance(
-                    wallet.address,
-                )
+        if (this.wallets[from] || this.wallets[to]) {
+            const walletAddress = this.wallets[from] ? from : to
+            const wallet = this.wallets[walletAddress]
 
-                await this.balancesService.updateBalance(
-                    wallet.id,
-                    network.id,
-                    network.nativeCurrency,
-                    ethers.formatEther(balance),
-                )
-                const receipt =
-                    await this.providers[network.name.toLowerCase()].getTransactionReceipt(hash)
-                const gasUsed = receipt.gasUsed.toString()
-                const gasPrice = receipt.gasPrice.toString()
-                const fee = ethers.formatEther((BigInt(gasUsed) * BigInt(gasPrice)).toString())
+            const balance = await this.providerService
+                .getProvider(network.name)
+                .getBalance(wallet.address)
 
-                await this.prisma.transaction.create({
-                    data: {
-                        hash: hash.toString(),
-                        from: from,
-                        to: to,
-                        value: ethers.formatEther(value),
-                        gasUsed: gasUsed,
-                        gasPrice: gasPrice,
-                        fee: fee,
-                        network: {
-                            connect: { id: network.id },
-                        },
-                        wallet: {
-                            connect: { id: wallet.id },
-                        },
+            await this.balancesService.updateBalance(
+                wallet.id,
+                network.id,
+                network.nativeCurrency,
+                ethers.formatEther(balance),
+            )
+            const receipt = await this.providerService
+                .getProvider(network.name.toLowerCase())
+                .getTransactionReceipt(hash)
+            const gasUsed = receipt.gasUsed.toString()
+            const gasPrice = receipt.gasPrice.toString()
+            const fee = ethers.formatEther((BigInt(gasUsed) * BigInt(gasPrice)).toString())
+
+            await this.prisma.transaction.create({
+                data: {
+                    hash: hash.toString(),
+                    from: from,
+                    to: to,
+                    value: ethers.formatEther(value),
+                    gasUsed: gasUsed,
+                    gasPrice: gasPrice,
+                    fee: fee,
+                    network: {
+                        connect: { id: network.id },
                     },
-                })
-            }
+                    wallet: {
+                        connect: { id: wallet.id },
+                    },
+                },
+            })
         }
     }
 
-    async updateTokenBalance(network: network, tokenId: number, walletAddress: string) {
-        const wallet = await this.walletsService.findOneByAddress(walletAddress)
-        const token = await this.tokensService.findOne(tokenId)
-        if (wallet) {
-            const provider = this.providers[network.name.toLowerCase()]
-            const erc20Contract = new ethers.Contract(token.address, erc20Abi, provider)
-            const tokenBalance = await erc20Contract.balanceOf(wallet.address)
+    async handleTokenTransfer(network: network, tokenId: number, from: string, to: string) {
+        if (this.wallets[from] || this.wallets[to]) {
+            const walletAddress = this.wallets[from] ? from : to
+            const wallet = this.wallets[walletAddress]
+
+            const token = this.tokens[tokenId]
+
+            const tokenBalance = await token.contract.balanceOf(wallet.address)
 
             await this.balancesService.updateBalance(
                 wallet.id,
@@ -197,5 +171,18 @@ export class TransactionsService {
                 ethers.formatUnits(tokenBalance, token.decimals),
             )
         }
+    }
+
+    async addTokenListeners(token: TokenWithContract) {
+        token.contract.on(token.contract.filters.Transfer(), async (log: EventLog) => {
+            const addressFrom = log.args[0]
+            const addressTo = log.args[1]
+            await this.handleTokenTransfer(
+                this.networks[token.network],
+                token.id,
+                addressFrom,
+                addressTo,
+            )
+        })
     }
 }
