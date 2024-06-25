@@ -19,28 +19,14 @@ export class TransactionsService {
 
     constructor(
         private prisma: PrismaService,
-        private configService: ConfigService,
-        private walletsService: WalletsService,
         private balancesService: BalancesService,
-        private tokensService: TokensService,
         private providerService: ProviderService,
         private networkService: NetworksService,
     ) {}
 
     async initialize() {
-        const walletsArray = await this.walletsService.findAll()
-        walletsArray.forEach((wallet) => {
-            this.wallets[wallet.address.toLowerCase()] = wallet
-        })
-        const tokensArray = await this.tokensService.findAllTokens()
-        tokensArray.forEach((token) => {
-            const key = `${token.address.toLowerCase()}_${token.network.toLowerCase()}`
-            const provider = this.providerService.getProvider(token.network.toLowerCase())
-            this.tokens[key] = {
-                token: token,
-                contract: new ethers.Contract(token.address, erc20Abi, provider),
-            }
-        })
+        await this.loadWalletsInPartitions()
+        await this.loadTokensInPartitions()
 
         const networksArray = await this.networkService.findAll()
         networksArray.forEach((network) => {
@@ -75,6 +61,43 @@ export class TransactionsService {
         delete this.tokens[key]
     }
 
+    private async loadWalletsInPartitions() {
+        const partitionSize = 10000
+        const totalWallets = await this.prisma.wallet.count()
+        const partitions = Math.ceil(totalWallets / partitionSize)
+
+        for (let i = 0; i < partitions; i++) {
+            const walletsArray = await this.prisma.wallet.findMany({
+                skip: i * partitionSize,
+                take: partitionSize,
+            })
+            walletsArray.forEach((wallet) => {
+                this.wallets[wallet.address.toLowerCase()] = wallet
+            })
+        }
+    }
+
+    private async loadTokensInPartitions() {
+        const partitionSize = 10000
+        const totalTokens = await this.prisma.token.count()
+        const partitions = Math.ceil(totalTokens / partitionSize)
+
+        for (let i = 0; i < partitions; i++) {
+            const tokensArray = await this.prisma.token.findMany({
+                skip: i * partitionSize,
+                take: partitionSize,
+            })
+            tokensArray.forEach((token) => {
+                const key = `${token.address.toLowerCase()}_${token.network.toLowerCase()}`
+                const provider = this.providerService.getProvider(token.network.toLowerCase())
+                this.tokens[key] = {
+                    token: token,
+                    contract: new ethers.Contract(token.address, erc20Abi, provider),
+                }
+            })
+        }
+    }
+
     private async startListening() {
         for (const networkName in this.networks) {
             const networkEntity = this.networks[networkName]
@@ -95,76 +118,112 @@ export class TransactionsService {
                     if (this.tokens[key]) {
                         const from = `0x${log.topics[1].slice(26)}`.toLowerCase()
                         const to = `0x${log.topics[2].slice(26)}`.toLowerCase()
-                        this.handleTokenTransfer(networkEntity.id, key, from, to)
+                        const txHash = log.transactionHash
+                        this.handleTokenTransfer(networkEntity, key, from, to, txHash)
                     }
                 })
 
                 for (const transaction of block.prefetchedTransactions) {
-                    await this.handleTransaction(networkEntity, transaction)
+                    await this.handleTransaction(
+                        networkEntity,
+                        transaction.from,
+                        transaction.to,
+                        transaction.hash,
+                    )
                 }
             })
         }
     }
 
-    async handleTransaction(network: network, transaction: ethers.TransactionResponse) {
-        const { from, to, hash, value } = transaction
-
+    async handleTransaction(network: network, from: string, to: string, hash: string) {
         if (this.wallets[from] || this.wallets[to]) {
             const walletAddress = this.wallets[from] ? from : to
             const wallet = this.wallets[walletAddress]
 
-            const balance = await this.providerService
-                .getProvider(network.name)
-                .getBalance(wallet.address)
+            if (await this.txProcessing(hash, network, wallet.id)) {
+                const balance = await this.providerService
+                    .getProvider(network.name)
+                    .getBalance(wallet.address)
 
-            await this.balancesService.updateBalance(
-                wallet.id,
-                network.id,
-                network.nativeCurrency,
-                ethers.formatEther(balance),
-            )
-            const receipt = await this.providerService
-                .getProvider(network.name.toLowerCase())
-                .getTransactionReceipt(hash)
-            const gasUsed = receipt.gasUsed.toString()
-            const gasPrice = receipt.gasPrice.toString()
-            const fee = ethers.formatEther((BigInt(gasUsed) * BigInt(gasPrice)).toString())
-
-            await this.prisma.transaction.create({
-                data: {
-                    hash: hash.toString(),
-                    from: from,
-                    to: to,
-                    value: ethers.formatEther(value),
-                    gasUsed: gasUsed,
-                    gasPrice: gasPrice,
-                    fee: fee,
-                    network: {
-                        connect: { id: network.id },
-                    },
-                    wallet: {
-                        connect: { id: wallet.id },
-                    },
-                },
-            })
+                await this.balancesService.updateBalance(
+                    wallet.id,
+                    network.id,
+                    network.nativeCurrency,
+                    ethers.formatEther(balance),
+                )
+            }
         }
     }
 
-    async handleTokenTransfer(networkId: number, key: string, from: string, to: string) {
+    async handleTokenTransfer(
+        network: network,
+        key: string,
+        from: string,
+        to: string,
+        txHash: string,
+    ) {
         if (this.wallets[from] || this.wallets[to]) {
             const walletAddress = this.wallets[from] ? from : to
             const wallet = this.wallets[walletAddress]
 
             const token = this.tokens[key].token
 
-            const tokenBalance = await this.tokens[key].contract.balanceOf(wallet.address)
+            if (await this.txProcessing(txHash, network, wallet.id)) {
+                const tokenBalance = await this.tokens[key].contract.balanceOf(wallet.address)
 
-            await this.balancesService.updateBalance(
-                wallet.id,
-                networkId,
-                token.symbol,
-                ethers.formatUnits(tokenBalance, token.decimals),
-            )
+                await this.balancesService.updateBalance(
+                    wallet.id,
+                    network.id,
+                    token.symbol,
+                    ethers.formatUnits(tokenBalance, token.decimals),
+                )
+            }
+        }
+    }
+
+    async txProcessing(hash: string, network: network, walletId: number) {
+        const provider = this.providerService.getProvider(network.name.toLowerCase())
+        const txResponse = await provider.getTransaction(hash)
+
+        await this.prisma.transaction.create({
+            data: {
+                hash: hash.toString(),
+                from: txResponse.from,
+                to: txResponse.to,
+                value: ethers.formatEther(txResponse.value),
+                gasUsed: '0',
+                gasPrice: '0',
+                fee: '0',
+                status: 'pending',
+                confirmations: 0,
+                network: {
+                    connect: { id: network.id },
+                },
+                wallet: {
+                    connect: { id: walletId },
+                },
+            },
+        })
+
+        const txReceipt = await txResponse.wait(3, 120) // 3 confirmations , timeout - 120
+
+        if (txReceipt) {
+            const confirmations = await txReceipt.confirmations()
+            const gasUsed = txReceipt.gasUsed.toString()
+            const gasPrice = txReceipt.gasPrice.toString()
+            const fee = ethers.formatEther((BigInt(gasUsed) * BigInt(gasPrice)).toString())
+
+            await this.prisma.transaction.updateMany({
+                where: { hash: hash },
+                data: {
+                    status: 'success',
+                    confirmations: confirmations,
+                    gasUsed: gasUsed,
+                    gasPrice: gasPrice,
+                    fee: fee,
+                },
+            })
+            return true
         }
     }
 }
