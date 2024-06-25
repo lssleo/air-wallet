@@ -16,7 +16,7 @@ export class AuthService {
         const expiresIn = Number(process.env.EXPIRATION) // Session expiration time in seconds, should match with JWT token
         const session = await this.sessionsService.createSession(user, ip, userAgent, expiresIn)
 
-        const payload = { email: user.email, sub: user.id, sessionId: session.id }
+        const payload = { sessionId: session.id }
         return {
             access_token: this.jwtService.sign(payload, { expiresIn }),
         }
@@ -24,13 +24,14 @@ export class AuthService {
 
     async validateUser(email: string, password: string): Promise<any> {
         const user = await this.usersService.findByEmail(email)
-        if (user && (await bcrypt.compare(password, user.password))) { // salt is part of stored string in db, not needed to pass it
+        if (user && (await bcrypt.compare(password, user.password))) {
+            // salt is part of stored string in db, not needed to pass it
             const { password, ...result } = user
             return result
         }
         return null
     }
-    
+
     async validate(payload: any) {
         const user = await this.usersService.findOne(payload.sub)
         if (!user) {

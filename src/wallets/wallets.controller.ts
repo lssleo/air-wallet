@@ -83,11 +83,4 @@ export class WalletsController {
         const user: user = req.user
         return this.walletsService.findAllForUser(user.id)
     }
-
-    @UseGuards(AuthGuard('jwt'))
-    @Get(':id')
-    async findOneForUser(@Request() req, @Param('id', ParseIntPipe) id: number) {
-        const user: user = req.user
-        return await this.walletsService.findOneForUser(user.id, id)
-    }
 }

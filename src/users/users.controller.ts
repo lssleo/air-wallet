@@ -1,23 +1,20 @@
-import { Controller, Get, Post, Body, Param, Delete, UseGuards } from '@nestjs/common'
+import { Controller, Get, Post, Body, Param, Delete, UseGuards, Request } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { CreateUserDto } from './dto/create-user.dto'
 import { AuthGuard } from '@nestjs/passport'
 import { ParseIntPipe } from '@nestjs/common'
+import { ApiKeyGuard } from 'src/auth/api-key.guard'
+import { user } from '@prisma/client'
 
 @Controller('users')
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
     @UseGuards(AuthGuard('jwt'))
-    @Get()
-    findAll() {
-        return this.usersService.findAll()
-    }
-
-    @UseGuards(AuthGuard('jwt'))
     @Get(':id')
-    findOne(@Param('id', ParseIntPipe) id: number) {
-        return this.usersService.findOne(id)
+    findOne(@Request() req, @Param('id', ParseIntPipe) id: number) {
+        const user: user = req.user
+        return this.usersService.findOne(user.id)
     }
 
     @Post('register')
@@ -35,7 +32,7 @@ export class UsersController {
         }
     }
 
-    @UseGuards(AuthGuard('jwt'))
+    @UseGuards(ApiKeyGuard)
     @Delete(':id')
     remove(@Param('id', ParseIntPipe) id: number) {
         return this.usersService.remove(id)
