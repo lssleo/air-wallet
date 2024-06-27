@@ -7,6 +7,7 @@ import { UsersModule } from '../users/users.module'
 import { JwtStrategy } from './jwt.strategy'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { SessionsService } from './sessions.service'
+import { ClientsModule, Transport } from '@nestjs/microservices'
 
 @Module({
     imports: [
@@ -20,6 +21,13 @@ import { SessionsService } from './sessions.service'
                 signOptions: { expiresIn: Number(process.env.EXPIRATION) * 1000 }, // secs to milisecs
             }),
         }),
+        ClientsModule.register([
+            {
+                name: 'USERS_SERVICE',
+                transport: Transport.TCP,
+                options: { host: 'users-service', port: 3001 },
+            },
+        ]),
     ],
     providers: [AuthService, JwtStrategy, SessionsService],
     controllers: [AuthController],
