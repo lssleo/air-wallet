@@ -26,61 +26,57 @@ export class WalletsController {
         return this.walletsService.createWallet(data.userId)
     }
 
-    // @UseGuards(AuthGuard('jwt'))
-    @Patch(':id/update-balances')
-    async update(@Request() req, @Param('id', ParseIntPipe) id: number) {
-        const user = req.user
-        const wallet = await this.walletsService.findOneForUser(user.id, id)
+    @UseGuards(AuthGuard)
+    @MessagePattern({ cmd: 'update-balances' })
+    async update(data: { userId: number; walletId: number }) {
+        const wallet = await this.walletsService.findOneForUser(data.userId, data.walletId)
 
-        if (!wallet || wallet.userId !== user.id) {
+        if (!wallet || wallet.userId !== data.userId) {
             throw new NotFoundException('Wallet not found or access denied')
         }
 
         await this.walletsService.updateBalances(wallet.id)
     }
 
-    // @UseGuards(AuthGuard('jwt'))
-    @Post(':id/send')
-    async sendTransaction(
-        @Request() req,
-        @Param('id', ParseIntPipe) id: number,
-        @Body('recipientAddress') recipientAddress: string,
-        @Body('amount') amount: string,
-        @Body('networkName') networkName: string,
-    ) {
-        const user = req.user
-        const wallet = await this.walletsService.findOneForUser(user.id, id)
+    @UseGuards(AuthGuard)
+    @MessagePattern({ cmd: 'send-tx-native' })
+    async sendTransactionWithNativeCurrency(data: {
+        userId: number
+        walletId: number
+        recipientAddress: string
+        amount: string
+        networkName: string
+    }) {
+        const wallet = await this.walletsService.findOneForUser(data.userId, data.walletId)
 
-        if (!wallet || wallet.userId !== user.id) {
+        if (!wallet || wallet.userId !== data.userId) {
             throw new NotFoundException('Wallet not found or access denied')
         }
 
         const txHash = await this.walletsService.sendTransactionNativeCurrency(
             wallet.id,
-            recipientAddress,
-            amount,
-            networkName,
+            data.recipientAddress,
+            data.amount,
+            data.networkName,
         )
         return { txHash }
     }
 
-    // @UseGuards(AuthGuard('jwt'))
-    @Delete(':id')
-    async remove(@Request() req, @Param('id', ParseIntPipe) id: number) {
-        const user = req.user
-        const wallet = await this.walletsService.findOneForUser(user.id, id)
+    @UseGuards(AuthGuard)
+    @MessagePattern({ cmd: 'delete-wallet' })
+    async remove(data: { userId: number; walletId: number }) {
+        const wallet = await this.walletsService.findOneForUser(data.userId, data.walletId)
 
-        if (!wallet || wallet.userId !== user.id) {
+        if (!wallet || wallet.userId !== data.userId) {
             throw new NotFoundException('Wallet not found or access denied')
         }
 
         await this.walletsService.remove(wallet.id)
     }
 
-    // @UseGuards(AuthGuard('jwt'))
-    @Get()
-    async findAllForUser(@Request() req) {
-        const user: user = req.user
-        return this.walletsService.findAllForUser(user.id)
+    @UseGuards(AuthGuard)
+    @MessagePattern({ cmd: 'get-all-wallets-for-user' })
+    async findAllWalletsForUser(data: { userId: number }) {
+        return this.walletsService.findAllForUser(data.userId)
     }
 }

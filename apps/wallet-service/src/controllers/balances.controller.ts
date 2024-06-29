@@ -1,9 +1,10 @@
 import { Controller, Post, Get, Body, Param, UseGuards, Request, NotFoundException } from '@nestjs/common'
 import { BalancesService } from 'src/services/balances.service'
 import { WalletsService } from 'src/services/wallets.service'
-import { AuthGuard } from '@nestjs/passport'
+import { AuthGuard } from 'src/guards/auth.guard'
 import { user } from '@prisma/client'
 import { ParseIntPipe } from '@nestjs/common'
+import { MessagePattern } from '@nestjs/microservices'
 
 @Controller('balances')
 export class BalancesController {
@@ -12,31 +13,15 @@ export class BalancesController {
         private readonly walletsService: WalletsService,
     ) {}
 
-    @UseGuards(AuthGuard('jwt'))
-    @Get('wallet/:walletId')
-    async findAllForWallet(@Request() req, @Param('walletId', ParseIntPipe) walletId: number) {
-        const user: user = req.user
-        const wallet = await this.walletsService.findOneForUser(user.id, walletId)
-        if (wallet) {
-            return this.balancesService.findAllForWallet(wallet.id)
-        }
-        throw new NotFoundException('Wallet not found or access denied')
-    }
-
-    @UseGuards(AuthGuard('jwt'))
-    @Get('wallet/:walletId/currency/:currency')
-    async findForWalletAndCurrency(
-        @Request() req,
-        @Param('walletId', ParseIntPipe) walletId: number,
-        @Param('currency') currency: string,
-    ) {
-        const userId = req.user.id
-        const wallet = await this.balancesService.findWalletForUser(userId, walletId)
+    @UseGuards(AuthGuard)
+    @MessagePattern({ cmd: 'wallet-and-currency' })
+    async findForWalletAndCurrency(data: { userId: number, walletId: number, currency: string }) {
+        const wallet = await this.balancesService.findWalletForUser(data.userId, data.walletId)
 
         if (!wallet) {
             throw new NotFoundException('Wallet not found or access denied')
         }
 
-        return this.balancesService.findForWalletAndCurrency(walletId, currency)
+        return this.balancesService.findForWalletAndCurrency(data.walletId, data.currency)
     }
 }
