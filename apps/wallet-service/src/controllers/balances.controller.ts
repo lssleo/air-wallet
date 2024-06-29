@@ -1,10 +1,23 @@
-import { Controller, Post, Get, Body, Param, UseGuards, Request, NotFoundException } from '@nestjs/common'
+import {
+    Controller,
+    Post,
+    Get,
+    Body,
+    Param,
+    UseGuards,
+    Request,
+    NotFoundException,
+} from '@nestjs/common'
 import { BalancesService } from 'src/services/balances.service'
 import { WalletsService } from 'src/services/wallets.service'
 import { AuthGuard } from 'src/guards/auth.guard'
 import { user } from '@prisma/client'
 import { ParseIntPipe } from '@nestjs/common'
 import { MessagePattern } from '@nestjs/microservices'
+import {
+    IFindForWalletAndCurrencyRequest,
+    IFindForWalletAndCurrencyResponse,
+} from 'src/interfaces/balances.interfaces'
 
 @Controller('balances')
 export class BalancesController {
@@ -15,13 +28,23 @@ export class BalancesController {
 
     @UseGuards(AuthGuard)
     @MessagePattern({ cmd: 'wallet-and-currency' })
-    async findForWalletAndCurrency(data: { userId: number, walletId: number, currency: string }) {
+    async findForWalletAndCurrency(
+        data: IFindForWalletAndCurrencyRequest,
+    ): Promise<IFindForWalletAndCurrencyResponse> {
         const wallet = await this.balancesService.findWalletForUser(data.userId, data.walletId)
 
         if (!wallet) {
             throw new NotFoundException('Wallet not found or access denied')
         }
 
-        return this.balancesService.findForWalletAndCurrency(data.walletId, data.currency)
+        const balances = await this.balancesService.findForWalletAndCurrency(
+            data.walletId,
+            data.currency,
+        )
+        return {
+            status: balances ? 200 : 404,
+            message: balances ? 'Balances retrieved' : 'Balances not found',
+            data: balances ? balances : null,
+        }
     }
 }
