@@ -1,14 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger'
 
 export class LoginUserDto {
-    @ApiProperty()
+    @ApiProperty({ description: 'User email' })
     email: string
 
-    @ApiProperty()
+    @ApiProperty({ description: 'User password' })
     password: string
 }
 
-export class VerifyDtoResponse {
-    @ApiProperty()
-    jwt: string
+export class LoginUserDtoResponse {
+    @ApiProperty({ description: 'Response status' })
+    readonly status!: number
+
+    @ApiProperty({ description: 'Response message' })
+    readonly message!: string
+
+    @ApiProperty({ description: 'Access token' })
+    readonly accessToken!: string
 }

@@ -30,15 +30,18 @@ export class AuthService {
             const payload = this.jwtService.verify(token)
             return this.validate(payload)
         } catch (e) {
-            throw new UnauthorizedException('Invalid token')
+            return null
         }
     }
 
     async validateUser(email: string, password: string): Promise<any> {
-        const userId = await firstValueFrom(
+        const response = await firstValueFrom(
             this.usersServiceClient.send({ cmd: 'validate-user' }, { email, password }),
         )
-        return userId
+        if (response.status !== 200) {
+            return null
+        }
+        return response.userId
     }
 
     async validate(payload: any) {
@@ -46,13 +49,13 @@ export class AuthService {
         if (!session) {
             throw new UnauthorizedException('Invalid session')
         }
-        const user: user = await firstValueFrom(
+        const response = await firstValueFrom(
             this.usersServiceClient.send({ cmd: 'check-id' }, { id: session.userId }),
         )
-        if (!user) {
-            throw new UnauthorizedException()
+        if (response.status !== 200) {
+            throw new UnauthorizedException(response.message)
         }
-
-        return { id: user.id  }
+        const user = response.data
+        return { id: user.id }
     }
 }
