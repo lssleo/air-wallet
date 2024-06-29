@@ -15,6 +15,18 @@ import { AuthGuard } from 'src/guards/auth.guard'
 import { user } from '@prisma/client'
 import { ParseIntPipe } from '@nestjs/common'
 import { MessagePattern } from '@nestjs/microservices'
+import {
+    ICreateWalletRequest,
+    ICreateWalletResponse,
+    IUpdateBalancesRequest,
+    IUpdateBalancesResponse,
+    ISendTransactionRequest,
+    ISendTransactionResponse,
+    IRemoveWalletRequest,
+    IRemoveWalletResponse,
+    IFindAllWalletsRequest,
+    IFindAllWalletsResponse,
+} from 'src/interfaces/wallets.interfaces'
 
 @Controller('wallets')
 export class WalletsController {
@@ -22,13 +34,18 @@ export class WalletsController {
 
     @UseGuards(AuthGuard)
     @MessagePattern({ cmd: 'create-wallet' })
-    async generate(data: { userId: number }) {
-        return this.walletsService.createWallet(data.userId)
+    async generate(data: ICreateWalletRequest): Promise<ICreateWalletResponse> {
+        const wallet = await this.walletsService.createWallet(data.userId)
+        return {
+            status: wallet ? 201 : 400,
+            message: wallet ? 'Wallet created successfully' : 'Wallet creation failed',
+            data: wallet,
+        }
     }
 
     @UseGuards(AuthGuard)
     @MessagePattern({ cmd: 'update-balances' })
-    async update(data: { userId: number; walletId: number }) {
+    async update(data: IUpdateBalancesRequest): Promise<IUpdateBalancesResponse> {
         const wallet = await this.walletsService.findOneForUser(data.userId, data.walletId)
 
         if (!wallet || wallet.userId !== data.userId) {
@@ -36,17 +53,17 @@ export class WalletsController {
         }
 
         await this.walletsService.updateBalances(wallet.id)
+        return {
+            status: 200,
+            message: 'Balances updated successfully',
+        }
     }
 
     @UseGuards(AuthGuard)
     @MessagePattern({ cmd: 'send-tx-native' })
-    async sendTransactionWithNativeCurrency(data: {
-        userId: number
-        walletId: number
-        recipientAddress: string
-        amount: string
-        networkName: string
-    }) {
+    async sendTransactionWithNativeCurrency(
+        data: ISendTransactionRequest,
+    ): Promise<ISendTransactionResponse> {
         const wallet = await this.walletsService.findOneForUser(data.userId, data.walletId)
 
         if (!wallet || wallet.userId !== data.userId) {
@@ -59,12 +76,16 @@ export class WalletsController {
             data.amount,
             data.networkName,
         )
-        return { txHash }
+        return {
+            status: txHash ? 200 : 400,
+            message: txHash ? 'Transaction sent successfully' : 'Transation sending failed',
+            txHash,
+        }
     }
 
     @UseGuards(AuthGuard)
     @MessagePattern({ cmd: 'delete-wallet' })
-    async remove(data: { userId: number; walletId: number }) {
+    async remove(data: IRemoveWalletRequest): Promise<IRemoveWalletResponse> {
         const wallet = await this.walletsService.findOneForUser(data.userId, data.walletId)
 
         if (!wallet || wallet.userId !== data.userId) {
@@ -72,11 +93,20 @@ export class WalletsController {
         }
 
         await this.walletsService.remove(wallet.id)
+        return {
+            status: 200,
+            message: 'Wallet deleted successfully',
+        }
     }
 
     @UseGuards(AuthGuard)
     @MessagePattern({ cmd: 'get-all-wallets-for-user' })
-    async findAllWalletsForUser(data: { userId: number }) {
-        return this.walletsService.findAllForUser(data.userId)
+    async findAllWalletsForUser(data: IFindAllWalletsRequest): Promise<IFindAllWalletsResponse> {
+        const wallets = await this.walletsService.findAllForUser(data.userId)
+        return {
+            status: wallets ? 200 : 400,
+            message: wallets ? 'Wallets retrieved successfully' : 'Retrieve wallets failed',
+            data: wallets,
+        }
     }
 }
