@@ -20,13 +20,10 @@ import { MessagePattern } from '@nestjs/microservices'
 export class WalletsController {
     constructor(private readonly walletsService: WalletsService) {}
 
-    // @UseGuards(AuthGuard('jwt'))
-
     @UseGuards(AuthGuard)
     @MessagePattern({ cmd: 'create-wallet' })
-    async generate(data: { user: any }) {
-        const user = data.user
-        return this.walletsService.createWallet(user)
+    async generate(data: { userId: number }) {
+        return this.walletsService.createWallet(data.userId)
     }
 
     // @UseGuards(AuthGuard('jwt'))

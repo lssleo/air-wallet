@@ -96,6 +96,13 @@ export class UsersService {
         })
     }
 
+    checkId(id: number): Promise<Partial<user>> {
+        return this.prisma.user.findUnique({
+            where: { id },
+            select: { id: true },
+        })
+    }
+
     findByEmail(email: string): Promise<Partial<user>> {
         return this.prisma.user.findFirst({
             where: { email },
