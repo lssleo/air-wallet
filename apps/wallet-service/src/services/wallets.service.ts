@@ -21,7 +21,7 @@ export class WalletsService {
         private eventEmitter: EventEmitter2,
     ) {}
 
-    async createWallet(user: user): Promise<wallet> {
+    async createWallet(userId: number): Promise<wallet> {
         const wallet = ethers.Wallet.createRandom()
         const address = wallet.address
         const privateKey = wallet.privateKey
@@ -31,7 +31,7 @@ export class WalletsService {
             data: {
                 address: address,
                 encryptedPrivateKey: encryptedPrivateKey,
-                userId: user.id,
+                userId: userId,
             },
         })
 

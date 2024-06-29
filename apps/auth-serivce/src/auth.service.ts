@@ -47,12 +47,12 @@ export class AuthService {
             throw new UnauthorizedException('Invalid session')
         }
         const user: user = await firstValueFrom(
-            this.usersServiceClient.send({ cmd: 'find-one' }, { id: session.userId }),
+            this.usersServiceClient.send({ cmd: 'check-id' }, { id: session.userId }),
         )
         if (!user) {
             throw new UnauthorizedException()
         }
 
-        return { id: user.id, email: user.email }
+        return { id: user.id  }
     }
 }

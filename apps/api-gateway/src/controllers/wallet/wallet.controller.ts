@@ -14,13 +14,11 @@ export class WalletController {
     @UseGuards(AuthGuard)
     @Post('create')
     async createWallet(@Req() req: any) {
-        const user = req.user
         const token = req.headers.authorization?.split(' ')[1]
         const response = await firstValueFrom(
             this.walletServiceClient.send(
                 { cmd: 'create-wallet' },
                 {
-                    user,
                     token
                 },
             ),
