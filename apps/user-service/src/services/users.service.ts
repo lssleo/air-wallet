@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { user } from '@prisma/client'
-import { CreateUserDto } from './dto/create-user.dto'
+import { CreateUserDto } from 'src/dto/create-user.dto.js'
 import { MailService } from './mail.service.ts'
 import * as bcrypt from 'bcrypt'
 
@@ -15,7 +15,10 @@ export class UsersService {
     async create(createUserDto: CreateUserDto): Promise<Partial<user>> {
         const salt = await bcrypt.genSalt()
         const hashedPassword = await bcrypt.hash(createUserDto.password, salt)
-        const existingUser = await this.findByEmail(createUserDto.email)
+        const existingUser = await await this.prisma.user.findFirst({
+            where: { email: createUserDto.email },
+            select: { id: true, email: true, isVerified: true },
+        })
         if (existingUser && !existingUser.isVerified) {
             const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
             const updatedUser = await this.prisma.user.update({
@@ -103,10 +106,14 @@ export class UsersService {
         })
     }
 
-    findByEmail(email: string): Promise<Partial<user>> {
-        return this.prisma.user.findFirst({
-            where: { email },
+    async findByEmail(id: number, email: string): Promise<Partial<user>> {
+        const user = await this.prisma.user.findFirst({
+            where: { id, email },
             select: { id: true, email: true, isVerified: true },
         })
+        if (user.id != id) {
+            return
+        }
+        return user
     }
 }

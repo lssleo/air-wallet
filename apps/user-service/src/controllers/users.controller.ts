@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Body, Param, Delete, UseGuards, Request } from '@nestjs/common'
-import { UsersService } from './users.service'
-import { CreateUserDto } from './dto/create-user.dto'
-import { AuthGuard } from './guards/auth.guard'
+import { UsersService } from 'src/services/users.service'
+import { CreateUserDto } from 'src/dto/create-user.dto'
+import { AuthGuard } from 'src/guards/auth.guard'
 import { ParseIntPipe } from '@nestjs/common'
-// import { ApiKeyGuard } from 'apps/auth/api-key.guard'
+import { ApiKeyGuard } from 'src/guards/api-key.guard'
 import { MessagePattern } from '@nestjs/microservices'
 import { user } from '@prisma/client'
 import * as bcrypt from 'bcrypt'
@@ -18,15 +18,10 @@ export class UsersController {
         return this.usersService.findOne(data.userId)
     }
 
-    @MessagePattern({ cmd: 'check-id' })
-    async checkId(data: { id: number }) {
-        return this.usersService.checkId(data.id)
-    }
-
     @UseGuards(AuthGuard)
     @MessagePattern({ cmd: 'find-by-email' })
-    async findByEmail(email: string) {
-        return this.usersService.findByEmail(email)
+    async findByEmail(data: { userId: number; email: string }) {
+        return this.usersService.findByEmail(data.userId, data.email)
     }
 
     @MessagePattern({ cmd: 'validate-user' })
@@ -53,9 +48,14 @@ export class UsersController {
         }
     }
 
-    // @UseGuards(ApiKeyGuard)
-    // @Delete(':id')
-    // remove(@Param('id', ParseIntPipe) id: number) {
-    //   return this.usersService.remove(id);
-    // }
+    @MessagePattern({ cmd: 'check-id' })
+    async checkId(data: { id: number }) {
+        return this.usersService.checkId(data.id)
+    }
+
+    @UseGuards(ApiKeyGuard)
+    @MessagePattern({ cmd: 'delete-user' })
+    remove(data: { userId: number }) {
+        return this.usersService.remove(data.userId)
+    }
 }

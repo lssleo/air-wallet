@@ -3,22 +3,23 @@ import { NetworksService } from 'src/services/networks.service'
 import { network } from '@prisma/client'
 import { ParseIntPipe } from '@nestjs/common'
 import { UseGuards } from '@nestjs/common'
-// import { ApiKeyGuard } from 'apps/auth/api-key.guard'
+import { ApiKeyGuard } from 'src/guards/api-key.guard'
+import { MessagePattern } from '@nestjs/microservices'
 
 @Controller('networks')
 export class NetworksController {
     constructor(private readonly networksService: NetworksService) {}
 
-    // @UseGuards(ApiKeyGuard)
-    @Post()
-    create(@Body() network: network): Promise<network> {
-        return this.networksService.create(network)
+    @UseGuards(ApiKeyGuard)
+    @MessagePattern({ cmd: 'add-network' })
+    create(data: { network: network }): Promise<network> {
+        return this.networksService.create(data.network)
     }
 
-    // @UseGuards(ApiKeyGuard)
-    @Delete(':id')
-    remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-        return this.networksService.remove(id)
+    @UseGuards(ApiKeyGuard)
+    @MessagePattern({ cmd: 'remove-network' })
+    remove(data: { networkId: number }): Promise<void> {
+        return this.networksService.remove(data.networkId)
     }
 
     @Get()
