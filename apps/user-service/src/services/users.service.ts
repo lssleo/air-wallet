@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { user } from '@prisma/client'
-import { CreateUserDto } from 'src/dto/create-user.dto.js'
+import { CreateUserDto } from 'src/interfaces/user.interfaces.js'
 import { MailService } from './mail.service.ts'
 import * as bcrypt from 'bcrypt'
 
@@ -88,18 +88,14 @@ export class UsersService {
         })
     }
 
-    findAll(): Promise<Partial<user>[]> {
-        return this.prisma.user.findMany({ select: { id: true, email: true } })
-    }
-
-    findOne(id: number): Promise<Partial<user>> {
+    async findOne(id: number): Promise<Partial<user>> {
         return this.prisma.user.findUnique({
             where: { id },
             select: { id: true, email: true, isVerified: true },
         })
     }
 
-    checkId(id: number): Promise<Partial<user>> {
+    async checkId(id: number): Promise<Partial<user>> {
         return this.prisma.user.findUnique({
             where: { id },
             select: { id: true },

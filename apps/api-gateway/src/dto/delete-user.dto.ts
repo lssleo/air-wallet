@@ -1,14 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 
-export class CreateUserDto {
-    @ApiProperty({ description: 'User email' })
-    email: string
-
-    @ApiProperty({ description: 'User password' })
-    password: string
-}
-
-export class CreateUserDtoResponse {
+export class DeleteUserResponse {
     @ApiProperty({ description: 'Response status' })
     status: number
 

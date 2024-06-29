@@ -19,14 +19,15 @@ export class AuthGuard implements CanActivate {
             throw new UnauthorizedException('User information or token is missing')
         }
 
-        try {
-            const validUser = await firstValueFrom(
-                this.authServiceClient.send({ cmd: 'validate-token' }, { token }),
-            )
-            data.userId = validUser.id
-            return true
-        } catch (error) {
-            throw new UnauthorizedException('Invalid user')
+        const response = await firstValueFrom(
+            this.authServiceClient.send({ cmd: 'validate-token' }, { token }),
+        )
+
+        if (response.status !== 200) {
+            throw new UnauthorizedException(response.message)
         }
+
+        data.userId = response.data.id
+        return true
     }
 }
