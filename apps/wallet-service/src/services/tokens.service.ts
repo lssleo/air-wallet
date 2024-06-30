@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
-import { AddTokenDto } from 'src/dto/token/add-token.dto'
-import { UpdateTokenDto } from 'src/dto/token/update-token.dto'
+import { AddTokenDto, UpdateTokenDto } from 'src/interfaces/tokens.interfaces'
 import { token } from '@prisma/client'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 

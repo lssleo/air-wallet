@@ -1,4 +1,4 @@
-import { Controller, Post, Put, Delete, Get, Body, Param, Patch, UseGuards } from '@nestjs/common'
+import { Controller, UseGuards } from '@nestjs/common'
 import { TokensService } from 'src/services/tokens.service'
 import { ApiKeyGuard } from 'src/guards/api-key.guard'
 import { MessagePattern } from '@nestjs/microservices'

@@ -1,5 +1,21 @@
+export interface AddTokenDto {
+    name: string
+    symbol: string
+    decimals: number
+    address: string
+    network: string
+}
+
+export interface UpdateTokenDto {
+    name?: string
+    symbol?: string
+    decimals?: number
+    address?: string
+    network?: string
+}
+
 export interface IAddTokenRequest {
-    addTokenDto: any
+    addTokenDto: AddTokenDto
 }
 
 export interface IAddTokenResponse {
@@ -10,7 +26,7 @@ export interface IAddTokenResponse {
 
 export interface IUpdateTokenRequest {
     id: number
-    updateTokenDto: any
+    updateTokenDto: UpdateTokenDto
 }
 
 export interface IUpdateTokenResponse {

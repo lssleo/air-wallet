@@ -1,6 +1,6 @@
 import { Controller, Post, Body, Req, Inject, UsePipes, ValidationPipe } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
-import { LoginUserDto, LoginUserDtoResponse } from 'src/dto/login-user.dto'
+import { LoginUserDto, LoginUserDtoResponse } from 'src/dto/auth.dto'
 import { Request } from 'express'
 import { firstValueFrom } from 'rxjs'
 import { ApiTags, ApiOperation, ApiCreatedResponse } from '@nestjs/swagger'
