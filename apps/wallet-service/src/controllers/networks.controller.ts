@@ -1,7 +1,5 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common'
+import { Controller } from '@nestjs/common'
 import { NetworksService } from 'src/services/networks.service'
-import { network } from '@prisma/client'
-import { ParseIntPipe } from '@nestjs/common'
 import { UseGuards } from '@nestjs/common'
 import { ApiKeyGuard } from 'src/guards/api-key.guard'
 import { MessagePattern } from '@nestjs/microservices'

@@ -1,19 +1,10 @@
 import {
     Controller,
-    Post,
-    Get,
     UseGuards,
-    Request,
-    Param,
-    Delete,
-    Patch,
-    NotFoundException,
-    Body,
+    NotFoundException
 } from '@nestjs/common'
 import { WalletsService } from 'src/services/wallets.service'
 import { AuthGuard } from 'src/guards/auth.guard'
-import { user } from '@prisma/client'
-import { ParseIntPipe } from '@nestjs/common'
 import { MessagePattern } from '@nestjs/microservices'
 import {
     ICreateWalletRequest,
@@ -79,7 +70,7 @@ export class WalletsController {
         return {
             status: txHash ? 200 : 400,
             message: txHash ? 'Transaction sent successfully' : 'Transation sending failed',
-            txHash,
+            txHash: txHash,
         }
     }
 

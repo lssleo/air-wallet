@@ -1,18 +1,11 @@
 import {
     Controller,
-    Post,
-    Get,
-    Body,
-    Param,
     UseGuards,
-    Request,
     NotFoundException,
 } from '@nestjs/common'
 import { BalancesService } from 'src/services/balances.service'
 import { WalletsService } from 'src/services/wallets.service'
 import { AuthGuard } from 'src/guards/auth.guard'
-import { user } from '@prisma/client'
-import { ParseIntPipe } from '@nestjs/common'
 import { MessagePattern } from '@nestjs/microservices'
 import {
     IFindForWalletAndCurrencyRequest,
