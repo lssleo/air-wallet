@@ -30,8 +30,8 @@ export class SessionsService {
         })
     }
 
-    async closeSession(sessionId: number): Promise<void> {
-        await this.prisma.session.update({
+    async closeSession(sessionId: number): Promise<session> {
+        return await this.prisma.session.update({
             where: { id: sessionId },
             data: { isActive: false },
         })
