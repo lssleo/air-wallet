@@ -19,42 +19,23 @@ export class TokensController {
     @UseGuards(ApiKeyGuard)
     @MessagePattern({ cmd: 'add-token' })
     async add(data: IAddTokenRequest): Promise<IAddTokenResponse> {
-        const token = await this.tokensService.addToken(data.addTokenDto)
-        return {
-            status: token ? 201 : 400,
-            message: token ? 'Token added successfully' : 'Token addition failed',
-            data: token,
-        }
+        return await this.tokensService.addToken(data)
     }
 
     @UseGuards(ApiKeyGuard)
     @MessagePattern({ cmd: 'update-token' })
     async update(data: IUpdateTokenRequest): Promise<IUpdateTokenResponse> {
-        const token = await this.tokensService.update(data.id, data.updateTokenDto)
-        return {
-            status: token ? 200 : 400,
-            message: token ? 'Token updated successfully' : 'Token update failed',
-            data: token,
-        }
+        return await this.tokensService.updateToken(data)
     }
 
     @UseGuards(ApiKeyGuard)
     @MessagePattern({ cmd: 'remove-token' })
     async remove(data: IRemoveTokenRequest): Promise<IRemoveTokenResponse> {
-        await this.tokensService.remove(data.id)
-        return {
-            status: 200,
-            message: 'Token removed successfully',
-        }
+        return await this.tokensService.removeToken(data)
     }
 
     @MessagePattern({ cmd: 'find-all-tokens' })
     async findAllTokens(): Promise<IFindAllTokensResponse> {
-        const tokens = await this.tokensService.findAllTokens()
-        return {
-            status: tokens ? 200 : 400,
-            message: tokens ? 'Tokens retrieved successfully' : 'Retrieve failed',
-            data: tokens,
-        }
+        return await this.tokensService.findAllTokens()
     }
 }

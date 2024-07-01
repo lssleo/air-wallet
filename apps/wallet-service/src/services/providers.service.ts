@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { NetworksService } from './networks.service'
+import { PrismaService } from 'src/prisma/prisma.service'
 import { ethers } from 'ethers'
 
 @Injectable()
@@ -9,11 +9,11 @@ export class ProviderService implements OnModuleInit {
 
     constructor(
         private configService: ConfigService,
-        private networksService: NetworksService,
+        private readonly prisma: PrismaService,
     ) {}
 
     async onModuleInit() {
-        const networks = await this.networksService.findAllOnlyNames()
+        const networks = await this.prisma.network.findMany({ select: { name: true } })
 
         networks.forEach((network) => {
             const rpcUrl = this.configService.get<string>(`${network.name.toUpperCase()}_RPC_URL`)

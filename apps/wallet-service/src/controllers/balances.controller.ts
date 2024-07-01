@@ -24,20 +24,6 @@ export class BalancesController {
     async findForWalletAndCurrency(
         data: IFindForWalletAndCurrencyRequest,
     ): Promise<IFindForWalletAndCurrencyResponse> {
-        const wallet = await this.balancesService.findWalletForUser(data.userId, data.walletId)
-
-        if (!wallet) {
-            throw new NotFoundException('Wallet not found or access denied')
-        }
-
-        const balances = await this.balancesService.findForWalletAndCurrency(
-            data.walletId,
-            data.currency,
-        )
-        return {
-            status: balances ? 200 : 404,
-            message: balances ? 'Balances retrieved' : 'Balances not found',
-            data: balances ? balances : null,
-        }
+        return await this.balancesService.findForWalletAndCurrency(data)
     }
 }

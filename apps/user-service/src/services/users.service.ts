@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
-import { user } from '@prisma/client'
 import { MailService } from './mail.service.ts'
-import { CreateUserDto } from 'src/interfaces/user.interfaces.js'
 import * as bcrypt from 'bcrypt'
 import {
     IFindOneRequest,
@@ -110,7 +108,7 @@ export class UsersService {
             }
             return {
                 status: 400,
-                message: 'Invalid verification code',
+                message: 'Verification failed',
             }
         } catch (error) {
             return {

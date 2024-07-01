@@ -1,11 +1,13 @@
 export interface ICreateNetworkRequest {
-    network: any
+    name: string
+    nativeCurrency: string
 }
 
 export interface ICreateNetworkResponse {
     status: number
     message: string
     data: any
+    error?: string
 }
 
 export interface IRemoveNetworkRequest {
@@ -15,12 +17,14 @@ export interface IRemoveNetworkRequest {
 export interface IRemoveNetworkResponse {
     status: number
     message: string
+    error?: string
 }
 
 export interface IFindAllNetworksResponse {
     status: number
     message: string
     data: any[]
+    error?: string
 }
 
 export interface IFindOneNetworkRequest {
@@ -31,4 +35,5 @@ export interface IFindOneNetworkResponse {
     status: number
     message: string
     data: any
+    error?: string
 }

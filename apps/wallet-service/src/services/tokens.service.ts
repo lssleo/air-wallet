@@ -1,7 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
-import { AddTokenDto, UpdateTokenDto } from 'src/interfaces/tokens.interfaces'
-import { token } from '@prisma/client'
+import {
+    IAddTokenRequest,
+    IAddTokenResponse,
+    IUpdateTokenRequest,
+    IUpdateTokenResponse,
+    IRemoveTokenRequest,
+    IRemoveTokenResponse,
+    IFindAllTokensResponse,
+} from 'src/interfaces/tokens.interfaces'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 
 @Injectable()
@@ -11,49 +18,96 @@ export class TokensService {
         private eventEmitter: EventEmitter2,
     ) {}
 
-    async addToken(addTokenDto: AddTokenDto): Promise<token> {
-        const token = await this.prisma.token.create({
-            data: {
-                name: addTokenDto.name,
-                symbol: addTokenDto.symbol,
-                decimals: addTokenDto.decimals,
-                address: addTokenDto.address,
-                network: addTokenDto.network,
-            },
-        })
+    async addToken(data: IAddTokenRequest): Promise<IAddTokenResponse> {
+        try {
+            const token = await this.prisma.token.create({
+                data: {
+                    name: data.addTokenDto.name,
+                    symbol: data.addTokenDto.symbol,
+                    decimals: data.addTokenDto.decimals,
+                    address: data.addTokenDto.address,
+                    network: data.addTokenDto.network,
+                },
+            })
 
-        this.eventEmitter.emit('token.added', token)
+            this.eventEmitter.emit('token.added', token)
 
-        return token
+            return {
+                status: 201,
+                message: 'Token added successfully',
+                data: token,
+            }
+        } catch (error) {
+            return {
+                status: 400,
+                message: 'Token addition failed',
+                data: null,
+                error: error.message,
+            }
+        }
     }
 
-    async update(id: number, updateTokenDto: UpdateTokenDto): Promise<token> {
-        const token = this.prisma.token.update({
-            where: { id },
-            data: {
-                name: updateTokenDto?.name,
-                symbol: updateTokenDto?.symbol,
-                decimals: updateTokenDto?.decimals,
-                address: updateTokenDto?.address,
-                network: updateTokenDto?.network,
-            },
-        })
+    async updateToken(data: IUpdateTokenRequest): Promise<IUpdateTokenResponse> {
+        try {
+            const token = await this.prisma.token.update({
+                where: { id: data.id },
+                data: {
+                    name: data.updateTokenDto?.name,
+                    symbol: data.updateTokenDto?.symbol,
+                    decimals: data.updateTokenDto?.decimals,
+                    address: data.updateTokenDto?.address,
+                    network: data.updateTokenDto?.network,
+                },
+            })
 
-        return token
+            return {
+                status: 200,
+                message: 'Token updated successfully',
+                data: token,
+            }
+        } catch (error) {
+            return {
+                status: 400,
+                message: 'Token update failed',
+                data: null,
+                error: error.message,
+            }
+        }
     }
 
-    async remove(id: number): Promise<void> {
-        const removedToken = await this.prisma.token.delete({ where: { id } })
-        this.eventEmitter.emit('token.removed', removedToken)
+    async removeToken(data: IRemoveTokenRequest): Promise<IRemoveTokenResponse> {
+        try {
+            const removedToken = await this.prisma.token.delete({ where: { id: data.id } })
+            this.eventEmitter.emit('token.removed', removedToken)
+
+            return {
+                status: 200,
+                message: 'Token removed successfully',
+            }
+        } catch (error) {
+            return {
+                status: 400,
+                message: 'Token removal failed',
+                error: error.message,
+            }
+        }
     }
 
-    async findAllTokens(): Promise<token[]> {
-        return this.prisma.token.findMany()
-    }
-
-    async findOne(tokenId: number): Promise<token> {
-        return this.prisma.token.findUnique({
-            where: { id: tokenId },
-        })
+    async findAllTokens(): Promise<IFindAllTokensResponse> {
+        try {
+            const tokens = await this.prisma.token.findMany()
+            return {
+                status: 200,
+                message: 'Tokens retrieved successfully',
+                data: tokens,
+            }
+        } catch (error) {
+            return {
+                status: 400,
+                message: 'Retrieve failed',
+                data: null,
+                error: error.message,
+            }
+        }
     }
 }

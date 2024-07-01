@@ -6,6 +6,7 @@ export interface ICreateWalletResponse {
     status: number
     message: string
     data: any
+    error?: string
 }
 
 export interface IUpdateBalancesRequest {
@@ -16,6 +17,7 @@ export interface IUpdateBalancesRequest {
 export interface IUpdateBalancesResponse {
     status: number
     message: string
+    error?: string
 }
 
 export interface ISendTransactionRequest {
@@ -30,6 +32,7 @@ export interface ISendTransactionResponse {
     status: number
     message: string
     txHash: string
+    error?: string
 }
 
 export interface IRemoveWalletRequest {
@@ -40,6 +43,7 @@ export interface IRemoveWalletRequest {
 export interface IRemoveWalletResponse {
     status: number
     message: string
+    error?: string
 }
 
 export interface IFindAllWalletsRequest {
@@ -50,4 +54,16 @@ export interface IFindAllWalletsResponse {
     status: number
     message: string
     data: any[]
+    error?: string
+}
+
+export interface IFindWalletByAddressRequest {
+    address: string
+}
+
+export interface IFindWalletByAddressResponse {
+    status: number
+    message: string
+    data: any
+    error?: string
 }

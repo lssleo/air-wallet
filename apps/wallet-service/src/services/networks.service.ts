@@ -1,29 +1,86 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
-import { PrismaPromise } from '@prisma/client'
-import { network } from '@prisma/client'
+import {
+    ICreateNetworkRequest,
+    ICreateNetworkResponse,
+    IRemoveNetworkRequest,
+    IRemoveNetworkResponse,
+    IFindAllNetworksResponse,
+    IFindOneNetworkRequest,
+    IFindOneNetworkResponse,
+} from 'src/interfaces/networks.interfaces'
 
 @Injectable()
 export class NetworksService {
     constructor(private prisma: PrismaService) {}
 
-    async create(data: network): Promise<network> {
-        return this.prisma.network.create({ data })
+    async create(data: ICreateNetworkRequest): Promise<ICreateNetworkResponse> {
+        try {
+            const network = await this.prisma.network.create({ data: data })
+            return {
+                status: 201,
+                message: 'Network created successfully',
+                data: network,
+            }
+        } catch (error) {
+            return {
+                status: 400,
+                message: 'Network creation failed',
+                data: null,
+                error: error.message,
+            }
+        }
     }
 
-    async remove(id: number): Promise<void> {
-        await this.prisma.network.delete({ where: { id } })
+    async remove(data: IRemoveNetworkRequest): Promise<IRemoveNetworkResponse> {
+        try {
+            await this.prisma.network.delete({ where: { id: data.networkId } })
+            return {
+                status: 200,
+                message: 'Network removed successfully',
+            }
+        } catch (error) {
+            return {
+                status: 400,
+                message: 'Network removal failed',
+                error: error.message,
+            }
+        }
     }
 
-    findAll(): Promise<network[]> {
-        return this.prisma.network.findMany()
+    async findAll(): Promise<IFindAllNetworksResponse> {
+        try {
+            const networks = await this.prisma.network.findMany()
+            return {
+                status: 200,
+                message: 'Networks retrieved successfully',
+                data: networks,
+            }
+        } catch (error) {
+            return {
+                status: 400,
+                message: 'Retrieve failed',
+                data: null,
+                error: error.message,
+            }
+        }
     }
 
-    findAllOnlyNames(): PrismaPromise<{ name: string }[]> {
-        return this.prisma.network.findMany({ select: { name: true } })
-    }
-
-    findOneById(id: number): Promise<network> {
-        return this.prisma.network.findUnique({ where: { id } })
+    async findOne(data: IFindOneNetworkRequest): Promise<IFindOneNetworkResponse> {
+        try {
+            const network = await this.prisma.network.findUnique({ where: { id: data.id } })
+            return {
+                status: network ? 200 : 404,
+                message: network ? 'Network retrieved successfully' : 'Network not found',
+                data: network,
+            }
+        } catch (error) {
+            return {
+                status: 500,
+                message: 'Internal server error',
+                data: null,
+                error: error.message,
+            }
+        }
     }
 }
