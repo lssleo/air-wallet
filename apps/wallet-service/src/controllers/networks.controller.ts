@@ -1,6 +1,5 @@
-import { Controller } from '@nestjs/common'
+import { Controller, UseGuards } from '@nestjs/common'
 import { NetworksService } from 'src/services/networks.service'
-import { UseGuards } from '@nestjs/common'
 import { ApiKeyGuard } from 'src/guards/api-key.guard'
 import { MessagePattern } from '@nestjs/microservices'
 import {
@@ -20,41 +19,22 @@ export class NetworksController {
     @UseGuards(ApiKeyGuard)
     @MessagePattern({ cmd: 'add-network' })
     async create(data: ICreateNetworkRequest): Promise<ICreateNetworkResponse> {
-        const network = await this.networksService.create(data.network)
-        return {
-            status: network ? 201 : 400,
-            message: network ? 'Network created successfully' : 'Network creation failed',
-            data: network,
-        }
+        return await this.networksService.create(data)
     }
 
     @UseGuards(ApiKeyGuard)
     @MessagePattern({ cmd: 'remove-network' })
     async remove(data: IRemoveNetworkRequest): Promise<IRemoveNetworkResponse> {
-        await this.networksService.remove(data.networkId)
-        return {
-            status: 200,
-            message: 'Network removed successfully',
-        }
+        return await this.networksService.remove(data)
     }
 
     @MessagePattern({ cmd: 'get-all-networks' })
     async findAll(): Promise<IFindAllNetworksResponse> {
-        const networks = await this.networksService.findAll()
-        return {
-            status: networks ? 200 : 400,
-            message: networks ? 'Networks retrieved successfully' : 'Retrieve failed',
-            data: networks,
-        }
+        return await this.networksService.findAll()
     }
 
     @MessagePattern({ cmd: 'get-network' })
     async findOne(data: IFindOneNetworkRequest): Promise<IFindOneNetworkResponse> {
-        const network = await this.networksService.findOneById(data.id)
-        return {
-            status: network ? 200 : 404,
-            message: network ? 'Network retrieved successfully' : 'Network not found',
-            data: network,
-        }
+        return await this.networksService.findOne(data)
     }
 }

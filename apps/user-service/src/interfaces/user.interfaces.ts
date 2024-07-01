@@ -6,6 +6,7 @@ export interface IFindOneResponse {
     status: number
     message: string
     data: any
+    error?: string
 }
 
 export interface IFindByEmailRequest {
@@ -17,6 +18,7 @@ export interface IFindByEmailResponse {
     status: number
     message: string
     data: any
+    error?: string
 }
 
 export interface IValidateUserRequest {
@@ -28,6 +30,7 @@ export interface IValidateUserResponse {
     status: number
     message: string
     userId: number | null
+    error?: string
 }
 
 export class CreateUserDto {
@@ -43,6 +46,7 @@ export interface IRegisterResponse {
     status: number
     message: string
     data: any
+    error?: string
 }
 
 export interface IVerifyEmailRequest {
@@ -53,6 +57,7 @@ export interface IVerifyEmailRequest {
 export interface IVerifyEmailResponse {
     status: number
     message: string
+    error?: string
 }
 
 export interface ICheckIdRequest {
@@ -63,6 +68,7 @@ export interface ICheckIdResponse {
     status: number
     message: string
     data: any
+    error?: string
 }
 
 export interface IDeleteUserRequest {
@@ -73,4 +79,5 @@ export interface IDeleteUserResponse {
     status: number
     message: string
     data: any
+    error?: string
 }

@@ -22,6 +22,7 @@ export interface IAddTokenResponse {
     status: number
     message: string
     data: any
+    error?: string
 }
 
 export interface IUpdateTokenRequest {
@@ -33,6 +34,7 @@ export interface IUpdateTokenResponse {
     status: number
     message: string
     data: any
+    error?: string
 }
 
 export interface IRemoveTokenRequest {
@@ -42,10 +44,12 @@ export interface IRemoveTokenRequest {
 export interface IRemoveTokenResponse {
     status: number
     message: string
+    error?: string
 }
 
 export interface IFindAllTokensResponse {
     status: number
     message: string
     data: any[]
+    error?: string
 }
