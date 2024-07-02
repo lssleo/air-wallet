@@ -11,27 +11,20 @@ import {
     UnauthorizedException,
     NotFoundException,
     ForbiddenException,
-    BadRequestException
+    BadRequestException,
 } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { firstValueFrom } from 'rxjs'
-import {
-    ApiTags,
-    ApiOperation,
-    ApiResponse,
-    ApiBearerAuth
-} from '@nestjs/swagger'
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'
 import { AuthGuard } from 'src/guards/auth.guard'
+import { CreateUserDto, VerifyEmailDto, DeleteUserDto } from 'src/dto/user/user.request.dto'
 import {
-    CreateUserDto,
     CreateUserDtoResponse,
-    VerifyEmailDto,
     VerifyEmailDtoResponse,
     GetUserResponse,
     GetUserByEmailResponse,
-    DeleteUserDto,
     DeleteUserResponse,
-} from 'src/dto/user.dto'
+} from 'src/dto/user/user.response.dto'
 
 @ApiTags('Users')
 @Controller()
