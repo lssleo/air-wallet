@@ -9,10 +9,11 @@ import {
     NotFoundException,
 } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
-import { LoginUserDto, LoginUserDtoResponse } from 'src/dto/auth.dto'
+import { LoginUserDto } from 'src/dto/auth/auth.request.dto'
+import { LoginUserDtoResponse } from 'src/dto/auth/auth.response.dto'
 import { Request } from 'express'
 import { firstValueFrom } from 'rxjs'
-import { ApiTags, ApiOperation, ApiCreatedResponse, ApiResponse } from '@nestjs/swagger'
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger'
 
 @ApiTags('Auth')
 @Controller()
