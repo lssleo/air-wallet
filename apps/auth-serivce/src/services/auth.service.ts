@@ -4,12 +4,8 @@ import { ClientProxy } from '@nestjs/microservices'
 import { SessionsService } from './sessions.service'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { firstValueFrom } from 'rxjs'
-import {
-    ILoginRequest,
-    ILoginResponse,
-    ITokenVerifyRequest,
-    ITokenVerifyResponse,
-} from '../interfaces/auth.interfaces'
+import { ILoginRequest, ITokenVerifyRequest } from 'src/interfaces/auth.interfaces.request'
+import { ILoginResponse, ITokenVerifyResponse } from 'src/interfaces/auth.interfaces.response'
 
 @Injectable()
 export class AuthService {
@@ -31,9 +27,9 @@ export class AuthService {
 
             if (response.status !== 200) {
                 return {
-                    status: 401,
+                    status: false,
                     message: 'Invalid credentials',
-                    data: null,
+                    access_token: null,
                 }
             }
 
@@ -50,15 +46,15 @@ export class AuthService {
             const token = this.jwtService.sign(payload, { expiresIn })
 
             return {
-                status: 200,
+                status: true,
                 message: 'User successfully logged in',
-                data: { access_token: token },
+                access_token: token,
             }
         } catch (error) {
             return {
-                status: error.status || 500,
+                status: false,
                 message: error.message || 'Internal server error',
-                data: null,
+                access_token: null,
             }
         }
     }
@@ -70,7 +66,7 @@ export class AuthService {
 
             if (!session) {
                 return {
-                    status: 401,
+                    status: false,
                     message: 'Invalid token',
                     userId: null,
                 }
@@ -82,7 +78,7 @@ export class AuthService {
 
             if (response.status !== 200) {
                 return {
-                    status: 401,
+                    status: false,
                     message: 'Invalid token',
                     userId: null,
                 }
@@ -90,13 +86,13 @@ export class AuthService {
 
             const user = response.data
             return {
-                status: 200,
+                status: true,
                 message: 'Token is valid',
                 userId: user.id,
             }
         } catch (error) {
             return {
-                status: 500,
+                status: false,
                 message: 'Internal server error',
                 userId: null,
             }

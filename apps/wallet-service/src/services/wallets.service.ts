@@ -7,18 +7,20 @@ import { BadRequestException } from '@nestjs/common'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import {
     ICreateWalletRequest,
-    ICreateWalletResponse,
     IUpdateBalancesRequest,
-    IUpdateBalancesResponse,
     ISendTransactionRequest,
-    ISendTransactionResponse,
     IRemoveWalletRequest,
-    IRemoveWalletResponse,
     IFindAllWalletsRequest,
-    IFindAllWalletsResponse,
     IFindWalletByAddressRequest,
+} from 'src/interfaces/request/wallets.interfaces.request'
+import {
+    ICreateWalletResponse,
+    IUpdateBalancesResponse,
+    ISendTransactionResponse,
+    IRemoveWalletResponse,
+    IFindAllWalletsResponse,
     IFindWalletByAddressResponse,
-} from 'src/interfaces/wallets.interfaces'
+} from 'src/interfaces/response/wallets.interfaces.response'
 
 import * as crypto from 'crypto-js'
 
@@ -43,20 +45,20 @@ export class WalletsService {
                     encryptedPrivateKey: encryptedPrivateKey,
                     userId: data.userId,
                 },
+                select: { id: true, address: true },
             })
 
             this.eventEmitter.emit('wallet.added', newWallet)
 
             return {
-                status: 201,
+                status: true,
                 message: 'Wallet created successfully',
-                data: newWallet,
+                wallet: newWallet,
             }
         } catch (error) {
             return {
-                status: 400,
+                status: false,
                 message: 'Wallet creation failed',
-                data: null,
                 error: error.message,
             }
         }
@@ -103,12 +105,12 @@ export class WalletsService {
             }
 
             return {
-                status: 200,
+                status: true,
                 message: 'Balances updated successfully',
             }
         } catch (error) {
             return {
-                status: 400,
+                status: false,
                 message: 'Balances update failed',
                 error: error.message,
             }
@@ -145,15 +147,14 @@ export class WalletsService {
             })
 
             return {
-                status: 200,
+                status: true,
                 message: 'Transaction sent successfully',
                 txHash: tx.hash,
             }
         } catch (error) {
             return {
-                status: 400,
+                status: false,
                 message: 'Transaction sending failed',
-                txHash: null,
                 error: error.message,
             }
         }
@@ -172,12 +173,12 @@ export class WalletsService {
             await this.prisma.wallet.delete({ where: { id: data.walletId } })
             this.eventEmitter.emit('wallet.removed', wallet)
             return {
-                status: 200,
+                status: true,
                 message: 'Wallet deleted successfully',
             }
         } catch (error) {
             return {
-                status: 400,
+                status: false,
                 message: 'Wallet deletion failed',
                 error: error.message,
             }
@@ -189,22 +190,24 @@ export class WalletsService {
     ): Promise<IFindWalletByAddressResponse> {
         try {
             const wallet = await this.prisma.wallet.findFirst({
-                where: { address: data.address },
+                where: {
+                    address: data.address,
+                    userId: data.userId,
+                },
                 include: {
                     balance: { include: { network: true } },
                     transaction: { include: { network: true } },
                 },
             })
             return {
-                status: 200,
+                status: true,
                 message: 'Wallet retrieved successfully',
-                data: wallet,
+                wallet: wallet,
             }
         } catch (error) {
             return {
-                status: 400,
+                status: false,
                 message: 'Retrieve wallet failed',
-                data: null,
                 error: error.message,
             }
         }
@@ -212,7 +215,7 @@ export class WalletsService {
 
     async findAllWalletsForUser(data: IFindAllWalletsRequest): Promise<IFindAllWalletsResponse> {
         try {
-            const wallet = await this.prisma.wallet.findMany({
+            const wallets = await this.prisma.wallet.findMany({
                 where: { userId: data.userId },
                 include: {
                     balance: { include: { network: true } },
@@ -220,15 +223,14 @@ export class WalletsService {
                 },
             })
             return {
-                status: 200,
+                status: true,
                 message: 'Wallet retrieved successfully',
-                data: wallet,
+                wallets: wallets,
             }
         } catch (error) {
             return {
-                status: 400,
-                message: 'Retrieve wallet failed',
-                data: null,
+                status: false,
+                message: 'Retrieve wallets failed',
                 error: error.message,
             }
         }

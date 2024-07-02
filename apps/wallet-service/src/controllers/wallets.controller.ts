@@ -4,18 +4,20 @@ import { AuthGuard } from 'src/guards/auth.guard'
 import { MessagePattern } from '@nestjs/microservices'
 import {
     ICreateWalletRequest,
-    ICreateWalletResponse,
     IUpdateBalancesRequest,
-    IUpdateBalancesResponse,
     ISendTransactionRequest,
-    ISendTransactionResponse,
     IRemoveWalletRequest,
-    IRemoveWalletResponse,
     IFindAllWalletsRequest,
-    IFindAllWalletsResponse,
     IFindWalletByAddressRequest,
+} from 'src/interfaces/request/wallets.interfaces.request'
+import {
+    ICreateWalletResponse,
+    IUpdateBalancesResponse,
+    ISendTransactionResponse,
+    IRemoveWalletResponse,
+    IFindAllWalletsResponse,
     IFindWalletByAddressResponse,
-} from 'src/interfaces/wallets.interfaces'
+} from 'src/interfaces/response/wallets.interfaces.response'
 
 @Controller('wallets')
 export class WalletsController {

@@ -4,20 +4,23 @@ import { MailService } from './mail.service.ts'
 import * as bcrypt from 'bcrypt'
 import {
     IFindOneRequest,
-    IFindOneResponse,
     IFindByEmailRequest,
-    IFindByEmailResponse,
-    IValidateUserRequest,
-    IValidateUserResponse,
     IRegisterRequest,
-    IRegisterResponse,
     IVerifyEmailRequest,
-    IVerifyEmailResponse,
     ICheckIdRequest,
-    ICheckIdResponse,
     IDeleteUserRequest,
+    IValidateUserRequest,
+} from 'src/interfaces/user.interfaces.request'
+
+import {
+    IFindOneResponse,
+    IFindByEmailResponse,
+    IRegisterResponse,
+    IVerifyEmailResponse,
+    ICheckIdResponse,
     IDeleteUserResponse,
-} from '../interfaces/user.interfaces'
+    IValidateUserResponse,
+} from 'src/interfaces/user.interfaces.response'
 
 @Injectable()
 export class UsersService {
@@ -48,15 +51,15 @@ export class UsersService {
                     `Verification code: ${(await this.prisma.user.findUnique({ where: { id: updatedUser.id }, select: { verificationCode: true } })).verificationCode}`,
                 )
                 return {
-                    status: 200,
+                    status: true,
                     message: 'Verification email send',
-                    data: updatedUser,
+                    user: updatedUser,
                 }
             } else if (existingUser && existingUser.isVerified) {
                 return {
-                    status: 400,
+                    status: false,
                     message: '',
-                    data: null,
+                    user: null,
                 }
             } else {
                 const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
@@ -75,16 +78,16 @@ export class UsersService {
                     `Verification code: ${(await this.prisma.user.findUnique({ where: { id: newUser.id }, select: { verificationCode: true } })).verificationCode}`,
                 )
                 return {
-                    status: 200,
+                    status: true,
                     message: 'Verification email send',
-                    data: newUser,
+                    user: newUser,
                 }
             }
         } catch (error) {
             return {
-                status: 400,
+                status: false,
                 message: 'User registration failed',
-                data: null,
+                user: null,
                 error: error.message,
             }
         }
@@ -102,17 +105,17 @@ export class UsersService {
                     data: { isVerified: true, verificationCode: null },
                 })
                 return {
-                    status: 200,
+                    status: true,
                     message: 'Email verified successfully',
                 }
             }
             return {
-                status: 400,
+                status: false,
                 message: 'Verification failed',
             }
         } catch (error) {
             return {
-                status: 400,
+                status: false,
                 message: 'Verification failed',
                 error: error.message,
             }
@@ -127,21 +130,19 @@ export class UsersService {
             })
             if (user && (await bcrypt.compare(data.password, user.password))) {
                 return {
-                    status: 200,
+                    status: true,
                     message: 'User validated',
                     userId: user.id,
                 }
             }
             return {
-                status: 401,
+                status: false,
                 message: 'Invalid credentials',
-                userId: null,
             }
         } catch (error) {
             return {
-                status: 500,
+                status: false,
                 message: 'Internal server error',
-                userId: null,
                 error: error.message,
             }
         }
@@ -154,15 +155,14 @@ export class UsersService {
                 select: { id: true, email: true },
             })
             return {
-                status: 200,
+                status: true,
                 message: 'User deleted successfully',
-                data: user,
+                user: { userId: user.id, email: user.email },
             }
         } catch (error) {
             return {
-                status: 400,
+                status: false,
                 message: 'User deletion failed',
-                data: null,
                 error: error.message,
             }
         }
@@ -175,15 +175,14 @@ export class UsersService {
                 select: { id: true, email: true, isVerified: true },
             })
             return {
-                status: user ? 200 : 404,
+                status: user ? true : false,
                 message: user ? 'User found' : 'User not found',
-                data: user,
+                user: { userId: user.id, email: user.email, isVerified: user.isVerified },
             }
         } catch (error) {
             return {
-                status: 500,
+                status: false,
                 message: 'Internal server error',
-                data: null,
                 error: error.message,
             }
         }
@@ -196,15 +195,14 @@ export class UsersService {
                 select: { id: true },
             })
             return {
-                status: user ? 200 : 404,
+                status: user ? true : false,
                 message: user ? 'User found' : 'User not found',
-                data: user.id,
+                userId: user.id,
             }
         } catch (error) {
             return {
-                status: 500,
+                status: false,
                 message: 'Internal server error',
-                data: null,
                 error: error.message,
             }
         }
@@ -217,15 +215,14 @@ export class UsersService {
                 select: { id: true, email: true, isVerified: true },
             })
             return {
-                status: user.id == data.userId ? 200 : 400,
+                status: user.id == data.userId ? true : false,
                 message: user ? 'User found' : 'Request failed',
-                data: user.id == data.userId ? user : null,
+                user: user.id == data.userId ? { userId: user.id, email: user.email } : null,
             }
         } catch (error) {
             return {
-                status: 500,
+                status: false,
                 message: 'Internal server error',
-                data: null,
                 error: error.message,
             }
         }

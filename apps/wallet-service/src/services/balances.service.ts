@@ -1,44 +1,37 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
-import {
-    IFindForWalletAndCurrencyRequest,
-    IFindForWalletAndCurrencyResponse,
-} from 'src/interfaces/balances.interfaces'
+import { IFindWalletWithCurrencyCurrencyRequest } from 'src/interfaces/request/balances.interfaces.request'
+import { IFindWalletWithCurrencyCurrencyResponse } from 'src/interfaces/response/balances.interfaces.response'
 
 @Injectable()
 export class BalancesService {
     constructor(private readonly prisma: PrismaService) {}
 
-    async findForWalletAndCurrency(
-        data: IFindForWalletAndCurrencyRequest,
-    ): Promise<IFindForWalletAndCurrencyResponse> {
+    async findWalletsWithCurrency(
+        data: IFindWalletWithCurrencyCurrencyRequest,
+    ): Promise<IFindWalletWithCurrencyCurrencyResponse> {
         try {
-            const wallet = await this.prisma.wallet.findFirst({
-                where: { id: data.walletId, userId: data.userId },
-            })
-
-            if (!wallet) {
-                return {
-                    status: 404,
-                    message: 'Wallet not found or access denied',
-                    data: null,
-                }
-            }
-
-            const balances = await this.prisma.balance.findFirst({
-                where: { walletId: wallet.id, currency: data.currency },
+            const balances = await this.prisma.balance.findMany({
+                where: {
+                    currency: data.currency,
+                    wallet: {
+                        userId: data.userId,
+                    },
+                },
+                include: {
+                    wallet: true,
+                },
             })
 
             return {
-                status: balances ? 200 : 404,
-                message: balances ? 'Balances retrieved' : 'Balances not found',
-                data: balances || null,
+                status: balances.length > 0,
+                message: balances.length > 0 ? 'Balances retrieved' : 'Balances not found',
+                balances: balances.length > 0 ? balances : null,
             }
         } catch (error) {
             return {
-                status: 500,
+                status: false,
                 message: 'Internal server error',
-                data: null,
                 error: error.message,
             }
         }

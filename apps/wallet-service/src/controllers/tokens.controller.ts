@@ -4,13 +4,15 @@ import { ApiKeyGuard } from 'src/guards/api-key.guard'
 import { MessagePattern } from '@nestjs/microservices'
 import {
     IAddTokenRequest,
-    IAddTokenResponse,
     IUpdateTokenRequest,
-    IUpdateTokenResponse,
     IRemoveTokenRequest,
+} from 'src/interfaces/request/tokens.interfaces.request'
+import {
+    IAddTokenResponse,
+    IUpdateTokenResponse,
     IRemoveTokenResponse,
     IFindAllTokensResponse,
-} from 'src/interfaces/tokens.interfaces'
+} from 'src/interfaces/response/tokens.interfaces.response'
 
 @Controller('tokens')
 export class TokensController {
