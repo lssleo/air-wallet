@@ -4,15 +4,23 @@ import {
     Body,
     Req,
     Inject,
-    Request,
     UseGuards,
     Param,
     Post,
     Delete,
+    UnauthorizedException,
+    NotFoundException,
+    ForbiddenException,
+    BadRequestException
 } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { firstValueFrom } from 'rxjs'
-import { ApiTags, ApiOperation, ApiCreatedResponse } from '@nestjs/swagger'
+import {
+    ApiTags,
+    ApiOperation,
+    ApiResponse,
+    ApiBearerAuth
+} from '@nestjs/swagger'
 import { AuthGuard } from 'src/guards/auth.guard'
 import {
     CreateUserDto,
@@ -31,183 +39,140 @@ export class UsersController {
     constructor(@Inject('USER_SERVICE') private readonly usersServiceClient: ClientProxy) {}
 
     @ApiOperation({ summary: 'Register new user' })
-    @ApiCreatedResponse({ description: 'User registration', type: CreateUserDtoResponse })
-    @UseGuards(AuthGuard)
+    @ApiResponse({
+        status: 200,
+        description: 'User registration',
+        type: CreateUserDtoResponse,
+    })
     @Post('register')
     async register(@Body() createUserDto: CreateUserDto): Promise<CreateUserDtoResponse> {
-        try {
-            const response = await firstValueFrom(
-                this.usersServiceClient.send<CreateUserDtoResponse>(
-                    { cmd: 'register' },
-                    createUserDto,
-                ),
-            )
+        const response = await firstValueFrom(
+            this.usersServiceClient.send<CreateUserDtoResponse>({ cmd: 'register' }, createUserDto),
+        )
 
-            if (response.status !== 201) {
-                return {
-                    status: 401,
-                    message: response.message || 'Request failed',
-                    data: null,
-                }
-            }
+        if (!response.status) {
+            throw new BadRequestException('Request failed')
+        }
 
-            return {
-                status: 200,
-                message: 'User successfully registered',
-                data: response.data,
-            }
-        } catch (error) {
-            return {
-                status: error.status || 500,
-                message: error.message || 'Internal server error',
-                data: null,
-            }
+        return {
+            status: true,
+            message: response.message,
+            user: response.user,
         }
     }
 
     @ApiOperation({ summary: 'Verify user email' })
-    @ApiCreatedResponse({ description: 'Email verification', type: VerifyEmailDtoResponse })
-    @UseGuards(AuthGuard)
+    @ApiResponse({
+        status: 200,
+        description: 'Email verification',
+        type: VerifyEmailDtoResponse,
+    })
     @Post('verify')
     async verifyEmail(@Body() verifyEmailDto: VerifyEmailDto): Promise<VerifyEmailDtoResponse> {
-        try {
-            const response = await firstValueFrom(
-                this.usersServiceClient.send<VerifyEmailDtoResponse>(
-                    { cmd: 'verify-email' },
-                    verifyEmailDto,
-                ),
-            )
+        const response = await firstValueFrom(
+            this.usersServiceClient.send<VerifyEmailDtoResponse>(
+                { cmd: 'verify-email' },
+                verifyEmailDto,
+            ),
+        )
 
-            if (response.status !== 200) {
-                return {
-                    status: 401,
-                    message: response.message || 'Unauthorized',
-                    data: null,
-                }
-            }
+        if (!response.status) {
+            throw new BadRequestException(response.message || 'Unauthorized')
+        }
 
-            return {
-                status: 200,
-                message: 'Email successfully verified',
-                data: response.data,
-            }
-        } catch (error) {
-            return {
-                status: error.status || 500,
-                message: error.message || 'Internal server error',
-                data: null,
-            }
+        return {
+            status: true,
+            message: response.message,
         }
     }
 
     @ApiOperation({ summary: 'Get user info' })
-    @ApiCreatedResponse({ description: 'User info', type: GetUserResponse })
+    @ApiResponse({
+        status: 200,
+        description: 'User info',
+        type: GetUserResponse,
+    })
+    @ApiBearerAuth()
     @UseGuards(AuthGuard)
     @Get('user')
-    async getUser(@Request() req): Promise<GetUserResponse> {
-        try {
-            const token = req.headers.authorization?.split(' ')[1]
-            const response = await firstValueFrom(
-                this.usersServiceClient.send<GetUserResponse>({ cmd: 'find-one' }, { token }),
-            )
+    async getUser(@Req() req): Promise<GetUserResponse> {
+        const token = req.headers.authorization?.split(' ')[1]
+        const response = await firstValueFrom(
+            this.usersServiceClient.send<GetUserResponse>({ cmd: 'find-one' }, { token }),
+        )
 
-            if (response.status !== 200) {
-                return {
-                    status: 401,
-                    message: response.message || 'Unauthorized',
-                    data: null,
-                }
-            }
+        if (!response.status) {
+            throw new UnauthorizedException(response.message || 'Unauthorized')
+        }
 
-            return {
-                status: 200,
-                message: 'User info retrieved successfully',
-                data: response.data,
-            }
-        } catch (error) {
-            return {
-                status: error.status || 500,
-                message: error.message || 'Internal server error',
-                data: null,
-            }
+        return {
+            status: true,
+            message: 'User info retrieved successfully',
+            user: response.user,
         }
     }
 
     @ApiOperation({ summary: 'Get user info by email' })
-    @ApiCreatedResponse({ description: 'User info by email', type: GetUserByEmailResponse })
+    @ApiResponse({
+        status: 200,
+        description: 'User info',
+        type: GetUserByEmailResponse,
+    })
+    @ApiBearerAuth()
     @UseGuards(AuthGuard)
     @Get('user/:email')
     async getUserByEmail(
-        @Request() req,
+        @Req() req,
         @Param('email') email: string,
     ): Promise<GetUserByEmailResponse> {
-        try {
-            const token = req.headers.authorization?.split(' ')[1]
-            const response = await firstValueFrom(
-                this.usersServiceClient.send<GetUserByEmailResponse>(
-                    { cmd: 'find-by-email' },
-                    { token, email },
-                ),
-            )
+        const token = req.headers.authorization?.split(' ')[1]
+        const response = await firstValueFrom(
+            this.usersServiceClient.send<GetUserByEmailResponse>(
+                { cmd: 'find-by-email' },
+                { token, email },
+            ),
+        )
 
-            if (response.status !== 200) {
-                return {
-                    status: 401,
-                    message: response.message || 'Unauthorized',
-                    data: null,
-                }
-            }
+        if (!response.status) {
+            throw new UnauthorizedException(response.message || 'Unauthorized')
+        }
 
-            return {
-                status: 200,
-                message: 'User info by email retrieved successfully',
-                data: response.data,
-            }
-        } catch (error) {
-            return {
-                status: error.status || 500,
-                message: error.message || 'Internal server error',
-                data: null,
-            }
+        return {
+            status: true,
+            message: response.message,
+            user: response.user,
         }
     }
 
     @ApiOperation({ summary: 'Delete user' })
-    @ApiCreatedResponse({ description: 'User deletion', type: DeleteUserResponse })
+    @ApiResponse({
+        status: 200,
+        description: 'Delete user',
+        type: DeleteUserResponse,
+    })
+    @ApiBearerAuth()
     @UseGuards(AuthGuard)
     @Delete('delete')
     async deleteUser(
         @Req() req: any,
         @Body() deleteUserDto: DeleteUserDto,
     ): Promise<DeleteUserResponse> {
-        try {
-            const apiKey = req.headers['api_key']
-            const response = await firstValueFrom(
-                this.usersServiceClient.send<DeleteUserResponse>(
-                    { cmd: 'delete-user' },
-                    { apiKey, deleteUserDto },
-                ),
-            )
+        const apiKey = req.headers['api_key']
+        const response = await firstValueFrom(
+            this.usersServiceClient.send<DeleteUserResponse>(
+                { cmd: 'delete-user' },
+                { apiKey, deleteUserDto },
+            ),
+        )
 
-            if (response.status !== 200) {
-                return {
-                    status: 401,
-                    message: response.message || 'Unauthorized',
-                    data: null,
-                }
-            }
+        if (!response.status) {
+            throw new UnauthorizedException(response.message || 'Unauthorized')
+        }
 
-            return {
-                status: 200,
-                message: 'User successfully deleted',
-                data: response.data,
-            }
-        } catch (error) {
-            return {
-                status: error.status || 500,
-                message: error.message || 'Internal server error',
-                data: null,
-            }
+        return {
+            status: true,
+            message: response.message,
+            user: response.user,
         }
     }
 }

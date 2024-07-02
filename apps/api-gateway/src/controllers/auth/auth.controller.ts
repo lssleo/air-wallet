@@ -1,53 +1,53 @@
-import { Controller, Post, Body, Req, Inject, UsePipes, ValidationPipe } from '@nestjs/common'
+import {
+    Controller,
+    Post,
+    Body,
+    Req,
+    Inject,
+    UsePipes,
+    ValidationPipe,
+    NotFoundException,
+} from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { LoginUserDto, LoginUserDtoResponse } from 'src/dto/auth.dto'
 import { Request } from 'express'
 import { firstValueFrom } from 'rxjs'
-import { ApiTags, ApiOperation, ApiCreatedResponse } from '@nestjs/swagger'
+import { ApiTags, ApiOperation, ApiCreatedResponse, ApiResponse } from '@nestjs/swagger'
 
 @ApiTags('Auth')
 @Controller()
 export class AuthController {
     constructor(@Inject('AUTH_SERVICE') private readonly authServiceClient: ClientProxy) {}
 
+    @ApiTags('Auth')
     @ApiOperation({ summary: 'Login user' })
-    @ApiCreatedResponse({ description: 'User successfully logged in', type: LoginUserDtoResponse })
+    @ApiResponse({
+        status: 200,
+        description: 'User log in',
+        type: LoginUserDtoResponse,
+    })
     @UsePipes(new ValidationPipe({ transform: true }))
     @Post('login')
     async login(
         @Body() loginUserDto: LoginUserDto,
         @Req() req: Request,
     ): Promise<LoginUserDtoResponse> {
-        try {
-            const response = await firstValueFrom(
-                this.authServiceClient.send(
-                    { cmd: 'login' },
-                    {
-                        loginUserDto,
-                        ip: req.ip,
-                        userAgent: req.headers['user-agent'] || '',
-                    },
-                ),
-            )
-            if (response.status !== 200) {
-                return {
-                    status: 401,
-                    message: response.message || 'Unauthorized',
-                    accessToken: null,
-                }
-            }
+        const response = await firstValueFrom(
+            this.authServiceClient.send('login', {
+                loginUserDto,
+                ip: req.ip,
+                userAgent: req.headers['user-agent'] || '',
+            }),
+        )
 
-            return {
-                status: 200,
-                message: 'User successfully logged in',
-                accessToken: response.data.access_token,
-            }
-        } catch (error) {
-            return {
-                status: error.status || 500,
-                message: error.message || 'Internal server error',
-                accessToken: null,
-            }
+        if (!response.status) {
+            throw new NotFoundException('Authentication failed')
+        }
+
+        return {
+            status: true,
+            message: response.message,
+            accessToken: response.access_token,
         }
     }
 }

@@ -5,24 +5,41 @@ import { ApiKeyGuard } from 'src/guards/api-key.guard'
 import { MessagePattern } from '@nestjs/microservices'
 import {
     IFindOneRequest,
-    IFindOneResponse,
     IFindByEmailRequest,
-    IFindByEmailResponse,
-    IValidateUserRequest,
-    IValidateUserResponse,
     IRegisterRequest,
-    IRegisterResponse,
     IVerifyEmailRequest,
-    IVerifyEmailResponse,
     ICheckIdRequest,
-    ICheckIdResponse,
     IDeleteUserRequest,
+} from 'src/interfaces/user.interfaces.request'
+
+import {
+    IFindOneResponse,
+    IFindByEmailResponse,
+    IRegisterResponse,
+    IVerifyEmailResponse,
+    ICheckIdResponse,
     IDeleteUserResponse,
-} from '../interfaces/user.interfaces'
+} from 'src/interfaces/user.interfaces.response'
 
 @Controller('users')
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
+
+    @MessagePattern({ cmd: 'register' })
+    async register(data: IRegisterRequest): Promise<IRegisterResponse> {
+        return await this.usersService.create(data)
+    }
+
+    @MessagePattern({ cmd: 'verify-email' })
+    async verifyEmail(data: IVerifyEmailRequest): Promise<IVerifyEmailResponse> {
+        return await this.usersService.verifyEmail(data)
+    }
+
+    @UseGuards(ApiKeyGuard)
+    @MessagePattern({ cmd: 'delete-user' })
+    async remove(data: IDeleteUserRequest): Promise<IDeleteUserResponse> {
+        return await this.usersService.remove(data)
+    }
 
     @UseGuards(AuthGuard)
     @MessagePattern({ cmd: 'find-one' })
@@ -36,29 +53,8 @@ export class UsersController {
         return await this.usersService.findByEmail(data)
     }
 
-    @MessagePattern({ cmd: 'validate-user' })
-    async validateUser(data: IValidateUserRequest): Promise<IValidateUserResponse> {
-        return await this.usersService.validateUser(data)
-    }
-
-    @MessagePattern({ cmd: 'register' })
-    async register(data: IRegisterRequest): Promise<IRegisterResponse> {
-        return await this.usersService.create(data)
-    }
-
-    @MessagePattern({ cmd: 'verify-email' })
-    async verifyEmail(data: IVerifyEmailRequest): Promise<IVerifyEmailResponse> {
-        return await this.usersService.verifyEmail(data)
-    }
-
     @MessagePattern({ cmd: 'check-id' })
     async checkId(data: ICheckIdRequest): Promise<ICheckIdResponse> {
         return await this.usersService.checkId(data)
-    }
-
-    @UseGuards(ApiKeyGuard)
-    @MessagePattern({ cmd: 'delete-user' })
-    async remove(data: IDeleteUserRequest): Promise<IDeleteUserResponse> {
-        return await this.usersService.remove(data)
     }
 }

@@ -1,12 +1,8 @@
 import { Controller, UsePipes, ValidationPipe } from '@nestjs/common'
 import { AuthService } from './services/auth.service'
 import { MessagePattern } from '@nestjs/microservices'
-import {
-    ILoginRequest,
-    ILoginResponse,
-    ITokenVerifyRequest,
-    ITokenVerifyResponse,
-} from './interfaces/auth.interfaces'
+import { ILoginRequest, ITokenVerifyRequest } from 'src/interfaces/auth.interfaces.request'
+import { ILoginResponse, ITokenVerifyResponse } from 'src/interfaces/auth.interfaces.response'
 
 @Controller('auth')
 export class AuthController {

@@ -2,13 +2,15 @@ import { Injectable } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
 import {
     IAddTokenRequest,
-    IAddTokenResponse,
     IUpdateTokenRequest,
-    IUpdateTokenResponse,
     IRemoveTokenRequest,
+} from 'src/interfaces/request/tokens.interfaces.request'
+import {
+    IAddTokenResponse,
+    IUpdateTokenResponse,
     IRemoveTokenResponse,
     IFindAllTokensResponse,
-} from 'src/interfaces/tokens.interfaces'
+} from 'src/interfaces/response/tokens.interfaces.response'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 
 @Injectable()
@@ -33,15 +35,14 @@ export class TokensService {
             this.eventEmitter.emit('token.added', token)
 
             return {
-                status: 201,
+                status: true,
                 message: 'Token added successfully',
-                data: token,
+                token: token,
             }
         } catch (error) {
             return {
-                status: 400,
+                status: false,
                 message: 'Token addition failed',
-                data: null,
                 error: error.message,
             }
         }
@@ -61,15 +62,14 @@ export class TokensService {
             })
 
             return {
-                status: 200,
+                status: true,
                 message: 'Token updated successfully',
-                data: token,
+                token: token,
             }
         } catch (error) {
             return {
-                status: 400,
+                status: false,
                 message: 'Token update failed',
-                data: null,
                 error: error.message,
             }
         }
@@ -81,12 +81,19 @@ export class TokensService {
             this.eventEmitter.emit('token.removed', removedToken)
 
             return {
-                status: 200,
+                status: true,
                 message: 'Token removed successfully',
+                token: {
+                    name: removedToken.name,
+                    symbol: removedToken.symbol,
+                    decimals: removedToken.decimals,
+                    address: removedToken.address,
+                    network: removedToken.network,
+                },
             }
         } catch (error) {
             return {
-                status: 400,
+                status: false,
                 message: 'Token removal failed',
                 error: error.message,
             }
@@ -97,15 +104,14 @@ export class TokensService {
         try {
             const tokens = await this.prisma.token.findMany()
             return {
-                status: 200,
+                status: true,
                 message: 'Tokens retrieved successfully',
-                data: tokens,
+                tokens: tokens,
             }
         } catch (error) {
             return {
-                status: 400,
+                status: false,
                 message: 'Retrieve failed',
-                data: null,
                 error: error.message,
             }
         }

@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
 import {
     ICreateNetworkRequest,
-    ICreateNetworkResponse,
     IRemoveNetworkRequest,
+} from 'src/interfaces/request/networks.interfaces.request'
+import {
+    ICreateNetworkResponse,
     IRemoveNetworkResponse,
     IFindAllNetworksResponse,
-    IFindOneNetworkRequest,
-    IFindOneNetworkResponse,
-} from 'src/interfaces/networks.interfaces'
+} from 'src/interfaces/response/networks.interfaces.response'
 
 @Injectable()
 export class NetworksService {
@@ -18,13 +18,13 @@ export class NetworksService {
         try {
             const network = await this.prisma.network.create({ data: data })
             return {
-                status: 201,
+                status: true,
                 message: 'Network created successfully',
                 data: network,
             }
         } catch (error) {
             return {
-                status: 400,
+                status: false,
                 message: 'Network creation failed',
                 data: null,
                 error: error.message,
@@ -36,12 +36,12 @@ export class NetworksService {
         try {
             await this.prisma.network.delete({ where: { id: data.networkId } })
             return {
-                status: 200,
+                status: true,
                 message: 'Network removed successfully',
             }
         } catch (error) {
             return {
-                status: 400,
+                status: false,
                 message: 'Network removal failed',
                 error: error.message,
             }
@@ -52,33 +52,14 @@ export class NetworksService {
         try {
             const networks = await this.prisma.network.findMany()
             return {
-                status: 200,
+                status: true,
                 message: 'Networks retrieved successfully',
-                data: networks,
+                networks: networks,
             }
         } catch (error) {
             return {
-                status: 400,
+                status: false,
                 message: 'Retrieve failed',
-                data: null,
-                error: error.message,
-            }
-        }
-    }
-
-    async findOne(data: IFindOneNetworkRequest): Promise<IFindOneNetworkResponse> {
-        try {
-            const network = await this.prisma.network.findUnique({ where: { id: data.id } })
-            return {
-                status: network ? 200 : 404,
-                message: network ? 'Network retrieved successfully' : 'Network not found',
-                data: network,
-            }
-        } catch (error) {
-            return {
-                status: 500,
-                message: 'Internal server error',
-                data: null,
                 error: error.message,
             }
         }

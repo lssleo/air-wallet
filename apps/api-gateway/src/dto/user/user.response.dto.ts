@@ -1,78 +1,53 @@
-import { ApiProperty } from '@nestjs/swagger'
-
-export class CreateUserDto {
-    @ApiProperty({ description: 'User email' })
-    email: string
-
-    @ApiProperty({ description: 'User password' })
-    password: string
-}
+import { ApiProperty } from "@nestjs/swagger";
 
 export class CreateUserDtoResponse {
     @ApiProperty({ description: 'Response status' })
-    status: number
+    status: boolean
 
     @ApiProperty({ description: 'Response message' })
     message: string
 
     @ApiProperty({ description: 'User data', nullable: true })
-    data: any
-}
-
-
-export class VerifyEmailDto {
-    @ApiProperty({ description: 'User email' })
-    email: string
-
-    @ApiProperty({ description: 'Verification code' })
-    code: string
+    user: { id: number; email: string; isVerified: boolean }
 }
 
 export class VerifyEmailDtoResponse {
     @ApiProperty({ description: 'Response status' })
-    status: number
+    status: boolean
 
     @ApiProperty({ description: 'Response message' })
     message: string
-
-    @ApiProperty()
-    data?: any
-}
-
-export class DeleteUserDto {
-    @ApiProperty()
-    readonly userId: number
 }
 
 export class DeleteUserResponse {
     @ApiProperty({ description: 'Response status' })
-    status: number
+    status: boolean
 
     @ApiProperty({ description: 'Response message' })
     message: string
 
     @ApiProperty({ description: 'User data', nullable: true })
-    data: any
+    user: { userId: number; email: string }
 }
 
 export class GetUserResponse {
     @ApiProperty({ description: 'Response status' })
-    status: number
+    status: boolean
 
     @ApiProperty({ description: 'Response message' })
     message: string
 
     @ApiProperty({ description: 'User data', nullable: true })
-    data?: any
+    user: { userId: number; email: string; isVerified: boolean }
 }
 
 export class GetUserByEmailResponse {
     @ApiProperty({ description: 'Response status' })
-    status: number
+    status: boolean
 
     @ApiProperty({ description: 'Response message' })
     message: string
 
     @ApiProperty({ description: 'User data', nullable: true })
-    data?: any
+    user?: { userId: number; email: string; isVerified: boolean }
 }
