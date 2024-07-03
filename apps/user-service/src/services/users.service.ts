@@ -32,9 +32,9 @@ export class UsersService {
     async create(data: IRegisterRequest): Promise<IRegisterResponse> {
         try {
             const salt = await bcrypt.genSalt()
-            const hashedPassword = await bcrypt.hash(data.createUserDto.password, salt)
+            const hashedPassword = await bcrypt.hash(data.password, salt)
             const existingUser = await this.prisma.user.findFirst({
-                where: { email: data.createUserDto.email },
+                where: { email: data.email },
                 select: { id: true, email: true, isVerified: true },
             })
 
@@ -65,7 +65,7 @@ export class UsersService {
                 const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
                 const newUser = await this.prisma.user.create({
                     data: {
-                        email: data.createUserDto.email,
+                        email: data.email,
                         password: hashedPassword,
                         verificationCode: verificationCode,
                         isVerified: false,

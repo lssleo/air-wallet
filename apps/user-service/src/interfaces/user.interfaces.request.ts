@@ -15,10 +15,8 @@ export interface IValidateUserRequest extends IRequest {
 }
 
 export interface IRegisterRequest extends IRequest {
-    createUserDto: {
-        email: string
-        password: string
-    }
+    email: string
+    password: string
 }
 
 export interface IVerifyEmailRequest extends IRequest {

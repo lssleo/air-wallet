@@ -1,9 +1,10 @@
-import { Controller, Body, Req, Inject, UseGuards, Get, NotFoundException } from '@nestjs/common'
+import { Controller, Body, Req, Inject, UseGuards, Get, NotFoundException, Post } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { firstValueFrom } from 'rxjs'
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'
 import { AuthGuard } from 'src/guards/auth.guard'
 import { FindWalletsWithCurrencyDtoResponse } from 'src/dto/wallet/response/balance.response.dto'
+import { FindWalletsWithCurrencyDto } from 'src/dto/wallet/request/balance.request.dto'
 
 @ApiTags('Balance')
 @Controller()
@@ -18,10 +19,10 @@ export class BalanceController {
     })
     @ApiBearerAuth()
     @UseGuards(AuthGuard)
-    @Get('getWalletsWithCurrency')
+    @Post('getWalletsWithCurrency')
     async findForWalletAndCurrency(
         @Req() req: any,
-        @Body() data: { currency: string },
+        @Body() data: FindWalletsWithCurrencyDto,
     ): Promise<FindWalletsWithCurrencyDtoResponse> {
         const token = req.headers.authorization?.split(' ')[1]
         const response = await firstValueFrom(

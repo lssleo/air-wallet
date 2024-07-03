@@ -19,7 +19,7 @@ export class BalancesService {
                     },
                 },
                 include: {
-                    wallet: true,
+                    wallet: { select: { id: true, address: true } },
                 },
             })
 

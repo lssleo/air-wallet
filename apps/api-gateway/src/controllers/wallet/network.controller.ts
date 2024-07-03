@@ -24,7 +24,7 @@ export class NetworkController {
     async findAllNetworks(): Promise<FindAllNetworksDtoResponse> {
         const response = await firstValueFrom(
             this.walletServiceClient.send<FindAllNetworksDtoResponse>(
-                { cmd: 'find-all-networks' },
+                { cmd: 'get-all-networks' },
                 {},
             ),
         )

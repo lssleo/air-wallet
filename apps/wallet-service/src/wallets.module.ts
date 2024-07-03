@@ -14,13 +14,13 @@ import { PrismaSeedService } from './prisma/prisma-seed.service'
 import { OnModuleInit } from '@nestjs/common'
 import { TransactionsService } from './services/transactions.service'
 import { ConfigService } from '@nestjs/config'
-import { EventEmitter2 } from '@nestjs/event-emitter'
+import { EventEmitterModule } from '@nestjs/event-emitter'
 import { ClientsModule, Transport } from '@nestjs/microservices'
 
 @Module({
     imports: [
+        EventEmitterModule.forRoot(),
         PrismaModule,
-        EventEmitter2,
         ClientsModule.register([
             {
                 name: 'AUTH_SERVICE',
@@ -38,7 +38,6 @@ import { ClientsModule, Transport } from '@nestjs/microservices'
         NetworksService,
         ProviderService,
         TransactionsService,
-        EventEmitter2,
     ],
     exports: [WalletsService],
     controllers: [WalletsController, BalancesController, NetworksController, TokensController],

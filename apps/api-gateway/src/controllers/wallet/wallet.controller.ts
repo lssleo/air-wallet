@@ -111,10 +111,9 @@ export class WalletController {
         const response = await firstValueFrom(
             this.walletServiceClient.send<SendTransactionDtoResponse>(
                 { cmd: 'send-tx-native' },
-                { data, token },
+                { sendTo: data, token },
             ),
         )
-
         if (!response.status) {
             throw new BadRequestException('Request failed')
         }
@@ -196,13 +195,13 @@ export class WalletController {
     @UseGuards(AuthGuard)
     @Post('getWalletByAddress')
     async findWalletForUserByAddress(
-        @Body() data: GetWalletByAddressDto,
         @Req() req: any,
+        @Body() data: GetWalletByAddressDto,
     ): Promise<GetWalletByAddressResponse> {
         const token = req.headers.authorization?.split(' ')[1]
         const response = await firstValueFrom(
             this.walletServiceClient.send<GetWalletByAddressResponse>(
-                { cmd: 'get-all-wallets-for-user' },
+                { cmd: 'get-wallet-by-address' },
                 { address: data.address, token },
             ),
         )

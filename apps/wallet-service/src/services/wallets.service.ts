@@ -122,7 +122,7 @@ export class WalletsService {
     ): Promise<ISendTransactionResponse> {
         try {
             const wallet = await this.prisma.wallet.findFirst({
-                where: { id: data.walletId, userId: data.userId },
+                where: { id: data.sendTo.walletId, userId: data.userId },
             })
 
             if (!wallet || wallet.userId !== data.userId) {
@@ -130,10 +130,9 @@ export class WalletsService {
             }
 
             const network = await this.prisma.network.findFirst({
-                where: { name: data.networkName.toLowerCase() },
+                where: { name: data.sendTo.networkName.toLowerCase() },
             })
             if (!network) throw new NotFoundException('Network not found')
-
             const rpcUrl = this.configService.get<string>(`${network.name.toUpperCase()}_RPC_URL`)
             if (!rpcUrl) throw new BadRequestException('RPC URL not configured for this network')
 
@@ -142,8 +141,8 @@ export class WalletsService {
             const walletSigner = new ethers.Wallet(decryptedPrivateKey, provider)
 
             const tx = await walletSigner.sendTransaction({
-                to: data.recipientAddress,
-                value: ethers.parseEther(data.amount),
+                to: data.sendTo.recipientAddress,
+                value: ethers.parseEther(data.sendTo.amount),
             })
 
             return {
@@ -190,13 +189,20 @@ export class WalletsService {
     ): Promise<IFindWalletByAddressResponse> {
         try {
             const wallet = await this.prisma.wallet.findFirst({
-                where: {
-                    address: data.address,
-                    userId: data.userId,
-                },
-                include: {
-                    balance: { include: { network: true } },
-                    transaction: { include: { network: true } },
+                where: { userId: data.userId, address: data.address },
+                select: {
+                    id: true,
+                    address: true,
+                    balance: {
+                        include: {
+                            network: true,
+                        },
+                    },
+                    transaction: {
+                        include: {
+                            network: true,
+                        },
+                    },
                 },
             })
             return {
@@ -217,14 +223,24 @@ export class WalletsService {
         try {
             const wallets = await this.prisma.wallet.findMany({
                 where: { userId: data.userId },
-                include: {
-                    balance: { include: { network: true } },
-                    transaction: { include: { network: true } },
+                select: {
+                    id: true,
+                    address: true,
+                    balance: {
+                        include: {
+                            network: true,
+                        },
+                    },
+                    transaction: {
+                        include: {
+                            network: true,
+                        },
+                    },
                 },
             })
             return {
                 status: true,
-                message: 'Wallet retrieved successfully',
+                message: 'Wallets retrieved successfully',
                 wallets: wallets,
             }
         } catch (error) {
