@@ -111,10 +111,9 @@ export class WalletController {
         const response = await firstValueFrom(
             this.walletServiceClient.send<SendTransactionDtoResponse>(
                 { cmd: 'send-tx-native' },
-                { data, token },
+                { sendTo: data, token },
             ),
         )
-
         if (!response.status) {
             throw new BadRequestException('Request failed')
         }
@@ -202,7 +201,7 @@ export class WalletController {
         const token = req.headers.authorization?.split(' ')[1]
         const response = await firstValueFrom(
             this.walletServiceClient.send<GetWalletByAddressResponse>(
-                { cmd: 'get-all-wallets-for-user' },
+                { cmd: 'get-wallet-by-address' },
                 { address: data.address, token },
             ),
         )

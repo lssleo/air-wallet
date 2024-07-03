@@ -34,11 +34,14 @@ export class AuthController {
         @Req() req: Request,
     ): Promise<LoginUserDtoResponse> {
         const response = await firstValueFrom(
-            this.authServiceClient.send('login', {
-                loginUserDto,
-                ip: req.ip,
-                userAgent: req.headers['user-agent'] || '',
-            }),
+            this.authServiceClient.send(
+                { cmd: 'login' },
+                {
+                    loginUserDto,
+                    ip: req.ip,
+                    userAgent: req.headers['user-agent'] || '',
+                },
+            ),
         )
 
         if (!response.status) {

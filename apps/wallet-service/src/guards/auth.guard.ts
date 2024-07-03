@@ -16,18 +16,18 @@ export class AuthGuard implements CanActivate {
         const data = context.switchToRpc().getData()
         const token = data.token
         if (!token) {
-            throw new UnauthorizedException('User information or token is missing')
+            throw new UnauthorizedException('Token information is missing')
         }
 
         const response = await firstValueFrom(
             this.authServiceClient.send({ cmd: 'validate-token' }, { token }),
         )
 
-        if (response.status !== 200) {
+        if (!response.status) {
             throw new UnauthorizedException(response.message)
         }
 
-        data.userId = response.data.id
+        data.userId = response.userId
         return true
     }
 }

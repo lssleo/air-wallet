@@ -5,9 +5,9 @@ export interface IResponse {
 }
 
 export interface ITokenVerifyResponse extends IResponse {
-    userId: number | null
+    userId?: number 
 }
 
 export interface ILoginResponse extends IResponse {
-    access_token: string | null
+    access_token?: string 
 }

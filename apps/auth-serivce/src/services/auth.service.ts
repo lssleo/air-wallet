@@ -25,11 +25,10 @@ export class AuthService {
                 ),
             )
 
-            if (response.status !== 200) {
+            if (!response.status) {
                 return {
                     status: false,
                     message: 'Invalid credentials',
-                    access_token: null,
                 }
             }
 
@@ -54,7 +53,6 @@ export class AuthService {
             return {
                 status: false,
                 message: error.message || 'Internal server error',
-                access_token: null,
             }
         }
     }
@@ -67,8 +65,7 @@ export class AuthService {
             if (!session) {
                 return {
                     status: false,
-                    message: 'Invalid token',
-                    userId: null,
+                    message: 'Invalid token'
                 }
             }
 
@@ -76,7 +73,7 @@ export class AuthService {
                 this.usersServiceClient.send({ cmd: 'check-id' }, { id: session.userId }),
             )
 
-            if (response.status !== 200) {
+            if (!response.status) {
                 return {
                     status: false,
                     message: 'Invalid token',
@@ -84,17 +81,15 @@ export class AuthService {
                 }
             }
 
-            const user = response.data
             return {
                 status: true,
                 message: 'Token is valid',
-                userId: user.id,
+                userId: response.userId,
             }
         } catch (error) {
             return {
                 status: false,
                 message: 'Internal server error',
-                userId: null,
             }
         }
     }

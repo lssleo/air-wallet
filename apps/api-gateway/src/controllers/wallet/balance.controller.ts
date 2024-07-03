@@ -1,4 +1,4 @@
-import { Controller, Body, Req, Inject, UseGuards, Get, NotFoundException } from '@nestjs/common'
+import { Controller, Body, Req, Inject, UseGuards, Get, NotFoundException, Post } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { firstValueFrom } from 'rxjs'
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'
@@ -19,7 +19,7 @@ export class BalanceController {
     })
     @ApiBearerAuth()
     @UseGuards(AuthGuard)
-    @Get('getWalletsWithCurrency')
+    @Post('getWalletsWithCurrency')
     async findForWalletAndCurrency(
         @Req() req: any,
         @Body() data: FindWalletsWithCurrencyDto,

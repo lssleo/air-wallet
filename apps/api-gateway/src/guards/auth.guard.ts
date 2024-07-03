@@ -20,6 +20,11 @@ export class AuthGuard implements CanActivate {
         }
 
         const token = authHeader.split(' ')[1]
+
+         if (!token) {
+             throw new UnauthorizedException('Token is missing')
+         }
+
         const response = await firstValueFrom(
             this.authServiceClient.send({ cmd: 'validate-token' }, { token }),
         )
