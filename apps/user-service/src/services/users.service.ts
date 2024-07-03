@@ -47,9 +47,9 @@ export class UsersService {
                 })
                 // await this.mailService.sendVerificationEmail(existingUser.email, verificationCode)
                 console.log('SENDING MESSAGES TO EMAIL DISABLED in users.sevice.ts')
-                console.log(
-                    `Verification code: ${(await this.prisma.user.findUnique({ where: { id: updatedUser.id }, select: { verificationCode: true } })).verificationCode}`,
-                )
+                // console.log(
+                //     `Verification code: ${(await this.prisma.user.findUnique({ where: { id: updatedUser.id }, select: { verificationCode: true } })).verificationCode}`,
+                // )
                 return {
                     status: true,
                     message: 'Verification email send',
@@ -74,9 +74,9 @@ export class UsersService {
                 })
                 // await this.mailService.sendVerificationEmail(newUser.email, verificationCode)
                 console.log('SENDING MESSAGES TO EMAIL DISABLED in users.service.ts')
-                console.log(
-                    `Verification code: ${(await this.prisma.user.findUnique({ where: { id: newUser.id }, select: { verificationCode: true } })).verificationCode}`,
-                )
+                // console.log(
+                //     `Verification code: ${(await this.prisma.user.findUnique({ where: { id: newUser.id }, select: { verificationCode: true } })).verificationCode}`,
+                // )
                 return {
                     status: true,
                     message: 'Verification email send',
@@ -177,7 +177,9 @@ export class UsersService {
             return {
                 status: user ? true : false,
                 message: user ? 'User found' : 'User not found',
-                user: { userId: user.id, email: user.email, isVerified: user.isVerified },
+                user: user
+                    ? { userId: user.id, email: user.email, isVerified: user.isVerified }
+                    : null,
             }
         } catch (error) {
             return {
@@ -197,7 +199,7 @@ export class UsersService {
             return {
                 status: user ? true : false,
                 message: user ? 'User found' : 'User not found',
-                userId: user.id,
+                userId: user ? user.id : null,
             }
         } catch (error) {
             return {
@@ -215,9 +217,10 @@ export class UsersService {
                 select: { id: true, email: true, isVerified: true },
             })
             return {
-                status: user.id == data.userId ? true : false,
+                status: user && user.id == data.userId ? true : false,
                 message: user ? 'User found' : 'Request failed',
-                user: user.id == data.userId ? { userId: user.id, email: user.email } : null,
+                user:
+                    user && user.id == data.userId ? { userId: user.id, email: user.email } : null,
             }
         } catch (error) {
             return {
