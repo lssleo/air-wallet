@@ -10,6 +10,7 @@ import {
     IVerifyEmailRequest,
     ICheckIdRequest,
     IDeleteUserRequest,
+    IValidateUserRequest,
 } from 'src/interfaces/user.interfaces.request'
 
 import {
@@ -19,6 +20,7 @@ import {
     IVerifyEmailResponse,
     ICheckIdResponse,
     IDeleteUserResponse,
+    IValidateUserResponse,
 } from 'src/interfaces/user.interfaces.response'
 
 @Controller('users')
@@ -56,5 +58,10 @@ export class UsersController {
     @MessagePattern({ cmd: 'check-id' })
     async checkId(data: ICheckIdRequest): Promise<ICheckIdResponse> {
         return await this.usersService.checkId(data)
+    }
+
+    @MessagePattern({ cmd: 'validate-user' })
+    async validateUser(data: IValidateUserRequest): Promise<IValidateUserResponse> {
+        return await this.usersService.validateUser(data)
     }
 }
