@@ -7,6 +7,9 @@ import { PrismaService } from './prisma/prisma.service'
 import { AuthController } from './controllers/auth/auth.controller'
 import { UsersController } from './controllers/user/user.controller'
 import { WalletController } from './controllers/wallet/wallet.controller'
+import { BalanceController } from './controllers/wallet/balance.controller'
+import { NetworkController } from './controllers/wallet/network.controller'
+import { TokenController } from './controllers/wallet/token.controller'
 import { AuthGuard } from './guards/auth.guard'
 import { ConfigService } from '@nestjs/config'
 import { JwtModule } from '@nestjs/jwt'
@@ -43,7 +46,15 @@ import { JwtModule } from '@nestjs/jwt'
         ]),
         PrismaModule,
     ],
-    controllers: [GatewayController, AuthController, UsersController, WalletController],
+    controllers: [
+        GatewayController,
+        AuthController,
+        UsersController,
+        WalletController,
+        BalanceController,
+        NetworkController,
+        TokenController,
+    ],
     providers: [PrismaService],
 })
 export class GatewayModule {}

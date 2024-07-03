@@ -196,8 +196,8 @@ export class WalletController {
     @UseGuards(AuthGuard)
     @Post('getWalletByAddress')
     async findWalletForUserByAddress(
-        @Body() data: GetWalletByAddressDto,
         @Req() req: any,
+        @Body() data: GetWalletByAddressDto,
     ): Promise<GetWalletByAddressResponse> {
         const token = req.headers.authorization?.split(' ')[1]
         const response = await firstValueFrom(
