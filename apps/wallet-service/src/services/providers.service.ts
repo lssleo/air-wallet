@@ -4,7 +4,7 @@ import { PrismaService } from 'src/prisma/prisma.service'
 import { ethers } from 'ethers'
 
 @Injectable()
-export class ProviderService implements OnModuleInit {
+export class ProviderService {
     private providers: { [key: string]: ethers.JsonRpcProvider } = {}
 
     constructor(
@@ -12,7 +12,7 @@ export class ProviderService implements OnModuleInit {
         private readonly prisma: PrismaService,
     ) {}
 
-    async onModuleInit() {
+    async createProviders() {
         const networks = await this.prisma.network.findMany({ select: { name: true } })
 
         networks.forEach((network) => {

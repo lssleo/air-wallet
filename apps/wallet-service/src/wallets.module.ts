@@ -52,6 +52,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices'
 export class WalletModule implements OnModuleInit {
     constructor(
         private readonly transactionsService: TransactionsService,
+        private readonly providersService: ProviderService,
         private readonly prismaSeedService: PrismaSeedService,
     ) {}
 
@@ -62,6 +63,7 @@ export class WalletModule implements OnModuleInit {
             console.error('Error seeding networks:', error)
         }
         // console.log('LISTENING BLOCKCHAIN IS OFF in transactions.module.ts')
+        await this.providersService.createProviders()
         await this.transactionsService.initialize()
     }
 }

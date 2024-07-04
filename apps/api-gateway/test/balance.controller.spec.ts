@@ -42,7 +42,7 @@ describe('BalanceController', () => {
     describe('findForWalletAndCurrency', () => {
         it('should return balances if request is successful', async () => {
             const req = { headers: { authorization: 'Bearer valid_token' } }
-            const data: FindWalletsWithCurrencyDto = { currency: 'USDT' }
+            const currency: string = 'USDT'
             const response: FindWalletsWithCurrencyDtoResponse = {
                 status: true,
                 message: 'Balances found',
@@ -53,31 +53,31 @@ describe('BalanceController', () => {
 
             jest.spyOn(clientProxy, 'send').mockImplementation(() => of(response))
 
-            const result = await balanceController.findForWalletAndCurrency(req, data)
+            const result = await balanceController.findForWalletAndCurrency(req, currency)
             expect(result).toEqual(response)
         })
 
         it('should throw NotFoundException if balance is not found', async () => {
             const req = { headers: { authorization: 'Bearer valid_token' } }
-            const data: FindWalletsWithCurrencyDto = { currency: 'USDT' }
+            const currency: string = 'USDT'
             const response = { status: false, message: 'Balance not found' }
 
             jest.spyOn(clientProxy, 'send').mockImplementation(() => of(response))
 
-            await expect(balanceController.findForWalletAndCurrency(req, data)).rejects.toThrow(
+            await expect(balanceController.findForWalletAndCurrency(req, currency)).rejects.toThrow(
                 NotFoundException,
             )
         })
 
         it('should handle unexpected errors', async () => {
             const req = { headers: { authorization: 'Bearer valid_token' } }
-            const data: FindWalletsWithCurrencyDto = { currency: 'USDT' }
+            const currency: string = 'USDT'
 
             jest.spyOn(clientProxy, 'send').mockImplementation(() =>
                 throwError(() => new Error('Unexpected error')),
             )
 
-            await expect(balanceController.findForWalletAndCurrency(req, data)).rejects.toThrow(
+            await expect(balanceController.findForWalletAndCurrency(req, currency)).rejects.toThrow(
                 Error,
             )
         })

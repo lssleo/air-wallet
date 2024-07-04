@@ -238,7 +238,7 @@ describe('WalletController', () => {
     describe('findWalletByAddress', () => {
         it('should return wallet by address if request is successful', async () => {
             const req = { headers: { authorization: 'Bearer valid_token' } }
-            const getWalletByAddressDto: GetWalletByAddressDto = { address: '0x0000...000' }
+            const address: string = '0x0000...000'
             const response: GetWalletByAddressResponse = {
                 status: true,
                 message: 'Wallet found',
@@ -265,47 +265,44 @@ describe('WalletController', () => {
 
             jest.spyOn(clientProxy, 'send').mockImplementation(() => of(response))
 
-            const result = await walletController.findWalletForUserByAddress(
-                req,
-                getWalletByAddressDto,
-            )
+            const result = await walletController.findWalletForUserByAddress(req, address)
             expect(result).toEqual(response)
         })
 
         it('should throw NotFoundException if wallet not found', async () => {
             const req = { headers: { authorization: 'Bearer valid_token' } }
-            const getWalletByAddressDto: GetWalletByAddressDto = { address: '0x0100...000' }
+            const address: string = '0x0100...000'
             const response = { status: false, message: 'Wallet not found' }
 
             jest.spyOn(clientProxy, 'send').mockImplementation(() => of(response))
 
-            await expect(
-                walletController.findWalletForUserByAddress(req, getWalletByAddressDto),
-            ).rejects.toThrow(NotFoundException)
+            await expect(walletController.findWalletForUserByAddress(req, address)).rejects.toThrow(
+                NotFoundException,
+            )
         })
 
         it('should throw NotFoundException if unauthorized', async () => {
             const req = { headers: { authorization: 'Bearer invalid_token' } }
-            const getWalletByAddressDto: GetWalletByAddressDto = { address: '0x0000...000' }
+            const address: string = '0x0000...000'
 
             jest.spyOn(clientProxy, 'send').mockImplementation(() => of({ status: false }))
 
-            await expect(
-                walletController.findWalletForUserByAddress(req, getWalletByAddressDto),
-            ).rejects.toThrow(NotFoundException)
+            await expect(walletController.findWalletForUserByAddress(req, address)).rejects.toThrow(
+                NotFoundException,
+            )
         })
 
         it('should handle unexpected errors', async () => {
             const req = { headers: { authorization: 'Bearer valid_token' } }
-            const getWalletByAddressDto: GetWalletByAddressDto = { address: '0x0000...000' }
+            const address: string = '0x0000...000'
 
             jest.spyOn(clientProxy, 'send').mockImplementation(() =>
                 throwError(() => new Error('Unexpected error')),
             )
 
-            await expect(
-                walletController.findWalletForUserByAddress(req, getWalletByAddressDto),
-            ).rejects.toThrow(Error)
+            await expect(walletController.findWalletForUserByAddress(req, address)).rejects.toThrow(
+                Error,
+            )
         })
     })
 })
