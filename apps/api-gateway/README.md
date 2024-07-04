@@ -10,10 +10,10 @@ Built with a focus on speed and reliability, this project leverages a microservi
 
 ## Powered with:
 
-*   <img align="left" src="https://img.shields.io/badge/Nest-3b0066?style=for-the-badge&logo=nestjs&logoColor=white" />\
+*   <img align="left" src="https://img.shields.io/badge/Nest-430a76?style=for-the-badge&logo=nestjs&logoColor=white" />\
     </span>
 
-*   <img align="left" src="https://img.shields.io/badge/PostgreSQL-3b0066?style=for-the-badge&logo=postgresql&logoColor=white" />\
+*   <img align="left" src="https://img.shields.io/badge/PostgreSQL-430a76?style=for-the-badge&logo=postgresql&logoColor=white" />\
     </span>
 
 *   <img align="left" src="https://img.shields.io/badge/TypeScript-4B0082?style=for-the-badge&logo=typescript&logoColor=white" />\
