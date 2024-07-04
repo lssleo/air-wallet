@@ -10,19 +10,19 @@ Built with a focus on speed and reliability, this project leverages a microservi
 
 ## Powered with:
 
-*   <img align="left" src="https://img.shields.io/badge/Nest-5107D9?style=for-the-badge&logo=nestjs&logoColor=white" />\
+*   <img align="left" src="https://img.shields.io/badge/Nest-6E2DE1?style=for-the-badge&logo=nestjs&logoColor=white" />\
     </span>
 
-*   <img align="left" src="https://img.shields.io/badge/PostgreSQL-4E0ACA?style=for-the-badge&logo=postgresql&logoColor=white" />\
+*   <img align="left" src="https://img.shields.io/badge/PostgreSQL-682BD5?style=for-the-badge&logo=postgresql&logoColor=white" />\
     </span>
 
-*   <img align="left" src="https://img.shields.io/badge/TypeScript-4B0CBE?style=for-the-badge&logo=typescript&logoColor=white" />\
+*   <img align="left" src="https://img.shields.io/badge/TypeScript-6329CB?style=for-the-badge&logo=typescript&logoColor=white" />\
     </span>
 
-*   <img align="left" src="https://img.shields.io/badge/Prisma-490EB5?style=for-the-badge&logo=prisma&logoColor=white" />\
+*   <img align="left" src="https://img.shields.io/badge/Prisma-5C26BE?style=for-the-badge&logo=prisma&logoColor=white" />\
     </span>
 
-*   <img align="left" src="https://img.shields.io/badge/JWT-4812AC?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white" />\
+*   <img align="left" src="https://img.shields.io/badge/JWT-5724B4?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white" />\
     </span>
 
 *   <img align="left" src="https://img.shields.io/badge/Swagger-4D20A0?style=for-the-badge&logo=swagger&logoColor=white" />\
