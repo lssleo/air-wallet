@@ -113,7 +113,7 @@ export class WalletController {
         const response = await firstValueFrom(
             this.walletServiceClient.send<SendTransactionDtoResponse>(
                 { cmd: 'send-tx-native' },
-                { sendTo: data, token },
+                { sendParams: data, token },
             ),
         )
         if (!response.status) {
