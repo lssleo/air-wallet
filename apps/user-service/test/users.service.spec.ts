@@ -268,7 +268,7 @@ describe('UsersService', () => {
             const result = await usersService.validateUser(data)
             expect(result).toEqual({
                 status: false,
-                message: 'Internal server error',
+                message: 'Validation failed',
                 error: 'Database error',
             })
         })
@@ -355,7 +355,7 @@ describe('UsersService', () => {
             const result = await usersService.findOne(data)
             expect(result).toEqual({
                 status: false,
-                message: 'Internal server error',
+                message: 'User not found',
                 error: 'Database error',
             })
         })
@@ -405,7 +405,7 @@ describe('UsersService', () => {
             const result = await usersService.checkId(data)
             expect(result).toEqual({
                 status: false,
-                message: 'Internal server error',
+                message: 'User not found',
                 error: 'Database error',
             })
         })
@@ -445,7 +445,7 @@ describe('UsersService', () => {
             })
         })
 
-        it('should handle errors gracefully', async () => {
+        it('should handle errors', async () => {
             const data: IFindByEmailRequest = { userId: 1, email: 'test@example.com' }
 
             jest.spyOn(prismaService.user, 'findFirst').mockImplementation(() => {
@@ -455,7 +455,7 @@ describe('UsersService', () => {
             const result = await usersService.findByEmail(data)
             expect(result).toEqual({
                 status: false,
-                message: 'Internal server error',
+                message: 'User not found',
                 error: 'Database error',
             })
         })

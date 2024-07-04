@@ -11,29 +11,37 @@ import { PrismaModule } from './prisma/prisma.module';
 import { PrismaService } from './prisma/prisma.service';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-    PassportModule,
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: Number(process.env.EXPIRATION) * 1000 }, // secs to milisecs
-      }),
-    }),
-    ClientsModule.register([
-      {
-        name: 'USER_SERVICE',
-        transport: Transport.TCP,
-        options: { host: '127.0.0.1', port: 3003 },
-      },
-    ]),
-    PrismaModule,
-  ],
-  providers: [AuthService, SessionsService, PrismaService],
-  controllers: [AuthController],
+    imports: [
+        ConfigModule.forRoot({
+            isGlobal: true,
+        }),
+        PassportModule,
+        JwtModule.registerAsync({
+            imports: [ConfigModule],
+            inject: [ConfigService],
+            useFactory: async (configService: ConfigService) => ({
+                secret: configService.get<string>('JWT_SECRET'),
+                signOptions: { expiresIn: configService.get<number>('EXPIRATION') * 1000 }, // secs to milisecs
+            }),
+        }),
+        ClientsModule.registerAsync([
+            {
+                name: 'USER_SERVICE',
+                imports: [ConfigModule],
+                useFactory: async (configService: ConfigService) => ({
+                    transport: Transport.TCP,
+                    options: {
+                        host: configService.get<string>('USER_SERVICE_HOST'),
+                        port: configService.get<number>('USER_SERVICE_PORT'),
+                    },
+                }),
+                inject: [ConfigService],
+            },
+            ,
+        ]),
+        PrismaModule,
+    ],
+    providers: [AuthService, SessionsService, PrismaService],
+    controllers: [AuthController],
 })
 export class AuthModule {}

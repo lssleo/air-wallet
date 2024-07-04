@@ -9,6 +9,8 @@ import {
     NotFoundException,
     UnauthorizedException,
     BadRequestException,
+    Get,
+    Param,
 } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { firstValueFrom } from 'rxjs'
@@ -164,7 +166,7 @@ export class WalletController {
     })
     @ApiBearerAuth()
     @UseGuards(AuthGuard)
-    @Post('getAllWallets')
+    @Get('getAllWallets')
     async findAllWalletsForUser(@Req() req: any): Promise<FindAllWalletsDtoResponse> {
         const token = req.headers.authorization?.split(' ')[1]
         const response = await firstValueFrom(
@@ -193,16 +195,16 @@ export class WalletController {
     })
     @ApiBearerAuth()
     @UseGuards(AuthGuard)
-    @Post('getWalletByAddress')
+    @Get('wallet/:address')
     async findWalletForUserByAddress(
         @Req() req: any,
-        @Body() data: GetWalletByAddressDto,
+        @Param('address') address: string,
     ): Promise<GetWalletByAddressResponse> {
         const token = req.headers.authorization?.split(' ')[1]
         const response = await firstValueFrom(
             this.walletServiceClient.send<GetWalletByAddressResponse>(
                 { cmd: 'get-wallet-by-address' },
-                { address: data.address, token },
+                { address: address, token },
             ),
         )
 

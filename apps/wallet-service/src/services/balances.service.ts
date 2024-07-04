@@ -31,8 +31,7 @@ export class BalancesService {
         } catch (error) {
             return {
                 status: false,
-                message: 'Internal server error',
-                error: error.message,
+                message: 'Balances not found'
             }
         }
     }

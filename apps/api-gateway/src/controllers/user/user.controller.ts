@@ -79,6 +79,38 @@ export class UsersController {
         }
     }
 
+    @ApiOperation({ summary: 'Delete user' })
+    @ApiResponse({
+        status: 200,
+        description: 'Delete user',
+        type: DeleteUserResponse,
+    })
+    @ApiBearerAuth()
+    @UseGuards(AuthGuard)
+    @Delete('delete')
+    async deleteUser(
+        @Req() req: any,
+        @Body() deleteUserDto: DeleteUserDto,
+    ): Promise<DeleteUserResponse> {
+        const apiKey = req.headers['api_key']
+        const response = await firstValueFrom(
+            this.usersServiceClient.send<DeleteUserResponse>(
+                { cmd: 'delete-user' },
+                { apiKey, deleteUserDto },
+            ),
+        )
+
+        if (!response.status) {
+            throw new UnauthorizedException(response.message || 'Unauthorized')
+        }
+
+        return {
+            status: true,
+            message: response.message,
+            user: response.user,
+        }
+    }
+
     @ApiOperation({ summary: 'Get user info' })
     @ApiResponse({
         status: 200,
@@ -123,38 +155,6 @@ export class UsersController {
             this.usersServiceClient.send<GetUserByEmailResponse>(
                 { cmd: 'find-by-email' },
                 { token, email },
-            ),
-        )
-
-        if (!response.status) {
-            throw new UnauthorizedException(response.message || 'Unauthorized')
-        }
-
-        return {
-            status: true,
-            message: response.message,
-            user: response.user,
-        }
-    }
-
-    @ApiOperation({ summary: 'Delete user' })
-    @ApiResponse({
-        status: 200,
-        description: 'Delete user',
-        type: DeleteUserResponse,
-    })
-    @ApiBearerAuth()
-    @UseGuards(AuthGuard)
-    @Delete('delete')
-    async deleteUser(
-        @Req() req: any,
-        @Body() deleteUserDto: DeleteUserDto,
-    ): Promise<DeleteUserResponse> {
-        const apiKey = req.headers['api_key']
-        const response = await firstValueFrom(
-            this.usersServiceClient.send<DeleteUserResponse>(
-                { cmd: 'delete-user' },
-                { apiKey, deleteUserDto },
             ),
         )
 

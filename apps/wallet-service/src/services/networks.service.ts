@@ -60,7 +60,6 @@ export class NetworksService {
             return {
                 status: false,
                 message: 'Retrieve failed',
-                error: error.message,
             }
         }
     }

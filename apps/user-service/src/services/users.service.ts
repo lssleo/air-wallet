@@ -142,7 +142,7 @@ export class UsersService {
         } catch (error) {
             return {
                 status: false,
-                message: 'Internal server error',
+                message: 'Validation failed',
                 error: error.message,
             }
         }
@@ -174,17 +174,19 @@ export class UsersService {
                 where: { id: data.userId },
                 select: { id: true, email: true, isVerified: true },
             })
+
             return {
-                status: user ? true : false,
-                message: user ? 'User found' : 'User not found',
-                user: user
-                    ? { userId: user.id, email: user.email, isVerified: user.isVerified }
-                    : null,
+                status: user && user.id == data.userId ? true : false,
+                message: user && user.id == data.userId ? 'User found' : 'User not found',
+                user:
+                    user && user.id == data.userId
+                        ? { userId: user.id, email: user.email, isVerified: user.isVerified }
+                        : null,
             }
         } catch (error) {
             return {
                 status: false,
-                message: 'Internal server error',
+                message: 'User not found',
                 error: error.message,
             }
         }
@@ -204,7 +206,7 @@ export class UsersService {
         } catch (error) {
             return {
                 status: false,
-                message: 'Internal server error',
+                message: 'User not found',
                 error: error.message,
             }
         }
@@ -218,14 +220,14 @@ export class UsersService {
             })
             return {
                 status: user && user.id == data.userId ? true : false,
-                message: user ? 'User found' : 'Request failed',
+                message: user && user.id == data.userId ? 'User found' : 'Request failed',
                 user:
                     user && user.id == data.userId ? { userId: user.id, email: user.email } : null,
             }
         } catch (error) {
             return {
                 status: false,
-                message: 'Internal server error',
+                message: 'User not found',
                 error: error.message,
             }
         }
