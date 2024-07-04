@@ -13,7 +13,7 @@ import { PrismaClient } from '@prisma/client'
 import { PrismaSeedService } from './prisma/prisma-seed.service'
 import { OnModuleInit } from '@nestjs/common'
 import { TransactionsService } from './services/transactions.service'
-import { ConfigService } from '@nestjs/config'
+import { ConfigService, ConfigModule } from '@nestjs/config'
 import { EventEmitterModule } from '@nestjs/event-emitter'
 import { ClientsModule, Transport } from '@nestjs/microservices'
 
@@ -21,11 +21,18 @@ import { ClientsModule, Transport } from '@nestjs/microservices'
     imports: [
         EventEmitterModule.forRoot(),
         PrismaModule,
-        ClientsModule.register([
+        ClientsModule.registerAsync([
             {
                 name: 'AUTH_SERVICE',
-                transport: Transport.TCP,
-                options: { host: '127.0.0.1', port: 3002 },
+                imports: [ConfigModule],
+                useFactory: async (configService: ConfigService) => ({
+                    transport: Transport.TCP,
+                    options: {
+                        host: configService.get<string>('AUTH_SERVICE_HOST'),
+                        port: configService.get<number>('AUTH_SERVICE_PORT'),
+                    },
+                }),
+                inject: [ConfigService],
             },
         ]),
     ],

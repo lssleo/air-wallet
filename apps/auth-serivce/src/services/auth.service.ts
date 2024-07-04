@@ -52,7 +52,7 @@ export class AuthService {
         } catch (error) {
             return {
                 status: false,
-                message: error.message || 'Internal server error',
+                message: 'Login failed'
             }
         }
     }
@@ -65,7 +65,7 @@ export class AuthService {
             if (!session) {
                 return {
                     status: false,
-                    message: 'Invalid token'
+                    message: 'Invalid token',
                 }
             }
 
@@ -89,7 +89,7 @@ export class AuthService {
         } catch (error) {
             return {
                 status: false,
-                message: 'Internal server error',
+                message: 'Validation failed',
             }
         }
     }

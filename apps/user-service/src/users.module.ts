@@ -4,7 +4,7 @@ import { UsersController } from './controllers/users.controller'
 import { PrismaModule } from './prisma/prisma.module'
 import { PrismaService } from './prisma/prisma.service'
 import { MailService } from './services/mail.service.ts'
-import { ConfigModule } from '@nestjs/config'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 import { ClientsModule, Transport } from '@nestjs/microservices'
 
 @Module({
@@ -12,11 +12,18 @@ import { ClientsModule, Transport } from '@nestjs/microservices'
         ConfigModule.forRoot({
             isGlobal: true,
         }),
-        ClientsModule.register([
+        ClientsModule.registerAsync([
             {
                 name: 'AUTH_SERVICE',
-                transport: Transport.TCP,
-                options: { host: '127.0.0.1', port: 3002 },
+                imports: [ConfigModule],
+                useFactory: async (configService: ConfigService) => ({
+                    transport: Transport.TCP,
+                    options: {
+                        host: configService.get<string>('AUTH_SERVICE_HOST'),
+                        port: configService.get<number>('AUTH_SERVICE_PORT'),
+                    },
+                }),
+                inject: [ConfigService],
             },
         ]),
         PrismaModule,

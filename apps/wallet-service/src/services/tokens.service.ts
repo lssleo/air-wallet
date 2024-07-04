@@ -43,7 +43,6 @@ export class TokensService {
             return {
                 status: false,
                 message: 'Token addition failed',
-                error: error.message,
             }
         }
     }
@@ -70,7 +69,6 @@ export class TokensService {
             return {
                 status: false,
                 message: 'Token update failed',
-                error: error.message,
             }
         }
     }
@@ -95,7 +93,6 @@ export class TokensService {
             return {
                 status: false,
                 message: 'Token removal failed',
-                error: error.message,
             }
         }
     }
@@ -112,7 +109,6 @@ export class TokensService {
             return {
                 status: false,
                 message: 'Retrieve failed',
-                error: error.message,
             }
         }
     }

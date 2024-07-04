@@ -59,7 +59,6 @@ export class WalletsService {
             return {
                 status: false,
                 message: 'Wallet creation failed',
-                error: error.message,
             }
         }
     }
@@ -112,7 +111,6 @@ export class WalletsService {
             return {
                 status: false,
                 message: 'Balances update failed',
-                error: error.message,
             }
         }
     }
@@ -154,7 +152,6 @@ export class WalletsService {
             return {
                 status: false,
                 message: 'Transaction sending failed',
-                error: error.message,
             }
         }
     }
@@ -179,7 +176,6 @@ export class WalletsService {
             return {
                 status: false,
                 message: 'Wallet deletion failed',
-                error: error.message,
             }
         }
     }
@@ -214,7 +210,6 @@ export class WalletsService {
             return {
                 status: false,
                 message: 'Retrieve wallet failed',
-                error: error.message,
             }
         }
     }
@@ -247,7 +242,6 @@ export class WalletsService {
             return {
                 status: false,
                 message: 'Retrieve wallets failed',
-                error: error.message,
             }
         }
     }
@@ -278,12 +272,18 @@ export class WalletsService {
     }
 
     private encryptPrivateKey(privateKey: string): string {
-        const encrypted = crypto.AES.encrypt(privateKey, process.env.ENCRYPTION_KEY).toString()
+        const encrypted = crypto.AES.encrypt(
+            privateKey,
+            this.configService.get<string>('ENCRYPTION_KEY'),
+        ).toString()
         return encrypted
     }
 
     private decryptPrivateKey(encryptedPrivateKey: string): string {
-        const bytes = crypto.AES.decrypt(encryptedPrivateKey, process.env.ENCRYPTION_KEY)
+        const bytes = crypto.AES.decrypt(
+            encryptedPrivateKey,
+            this.configService.get<string>('ENCRYPTION_KEY'),
+        )
         const decrypted = bytes.toString(crypto.enc.Utf8)
         return decrypted
     }

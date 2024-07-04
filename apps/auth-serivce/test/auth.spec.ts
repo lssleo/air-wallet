@@ -91,7 +91,7 @@ describe('AuthService', () => {
             const result = await authService.login(data)
             expect(result).toEqual({
                 status: false,
-                message: 'Unexpected error',
+                message: 'Login failed',
             })
         })
     })
@@ -141,7 +141,7 @@ describe('AuthService', () => {
             const result = await authService.validateToken(data)
             expect(result).toEqual({
                 status: false,
-                message: 'Internal server error'
+                message: 'Validation failed',
             })
         })
     })
