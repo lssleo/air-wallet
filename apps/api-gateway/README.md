@@ -1,10 +1,8 @@
 <h1 align='center'>
 
-AIR WALLET
+AIR WALLET API-GATEWAY
 
 </h1>
-
-Built with a focus on speed and reliability, this project leverages a microservices architecture for optimal performance. Its modular design ensures seamless scalability and maintenance. Developed with cutting-edge technologies, it delivers unparalleled efficiency and robustness.
 
 </br>
 
@@ -63,9 +61,34 @@ Built with a focus on speed and reliability, this project leverages a microservi
 
 </br>
 
-## Run:
+## Installation
 
--   [API-GATEWAY](apps/api-gateway/README.md)
--   [AUTH-SERVICE](apps/auth-service/README.md)
--   [USER-SERVICE](apps/user-service/README.md)
--   [WALLET-SERVICE](apps/wallet-service/README.md)
+```
+yarn install
+```
+## Setup
+
+Create .env file and set parameters
+
+```
+AUTH_SERVICE_HOST=
+AUTH_SERVICE_PORT=
+
+USER_SERVICE_HOST=
+USER_SERVICE_PORT=
+
+WALLET_SERVICE_HOST=
+WALLET_SERVICE_PORT=
+```
+
+## Running the app
+
+```
+yarn start
+```
+
+## Test
+
+```
+yarn test
+```

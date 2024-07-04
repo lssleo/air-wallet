@@ -1,73 +1,98 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+<h1 align='center'>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+AIR WALLET AUTH-SERVICE
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+</h1>
 
-## Description
+</br>
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Powered with:
+
+*   <img align="left" src="https://img.shields.io/badge/Nest-6E2DE1?style=for-the-badge&logo=nestjs&logoColor=white" />\
+    </span>
+
+*   <img align="left" src="https://img.shields.io/badge/PostgreSQL-682BD5?style=for-the-badge&logo=postgresql&logoColor=white" />\
+    </span>
+
+*   <img align="left" src="https://img.shields.io/badge/TypeScript-6329CB?style=for-the-badge&logo=typescript&logoColor=white" />\
+    </span>
+
+*   <img align="left" src="https://img.shields.io/badge/Prisma-5C26BE?style=for-the-badge&logo=prisma&logoColor=white" />\
+    </span>
+
+*   <img align="left" src="https://img.shields.io/badge/JWT-5724B4?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white" />\
+    </span>
+
+*   <img align="left" src="https://img.shields.io/badge/Swagger-4D20A0?style=for-the-badge&logo=swagger&logoColor=white" />\
+    </span>
+
+*   <img align="left" src="https://img.shields.io/badge/Jest-4D2CAC?style=for-the-badge&logo=jest&logoColor=white" />\
+    </span>
+
+*   <img align="left" src="https://img.shields.io/badge/Ethereum-4D39B9?style=for-the-badge&logo=Ethereum&logoColor=white" />\
+    </span>
+
+*   <img align="left" src="https://img.shields.io/badge/Polygon-4D45C6?style=for-the-badge&logo=Polygon&logoColor=white" />\
+    </span>
+
+*   <img align="left" src="https://img.shields.io/badge/Ethers.js-4D52D2?style=for-the-badge&logo=ethereum&logoColor=white" />\
+    </span>
+
+*   <img align="left" src="https://img.shields.io/badge/alchemy-4D5EDF?style=for-the-badge&logo=alchemy&logoColor=white" />\
+    </span>
+
+*   <img align="left" src="https://img.shields.io/badge/CryptoJS-4D78F8?style=for-the-badge&logo=cryptography&logoColor=white" />\
+    </span>
+
+*   <img align="left" src="https://img.shields.io/badge/BCRYPT-4D84FF?style=for-the-badge&logo=bcrypt.js-js&logoColor=white" />\
+    </span>
+
+*   <img align="left" src="https://img.shields.io/badge/nodemailer-4D91FF?style=for-the-badge&logo=nodemailer.js-js&logoColor=white" />\
+    </span>
+
+*   <img align="left" src="https://img.shields.io/badge/Node.js-4D9EFF?style=for-the-badge&logo=nodedotjs&logoColor=white" />\
+    </span>
+
+*   <img align="left" src="https://img.shields.io/badge/Express-4DAAFF?style=for-the-badge&logo=express&logoColor=white" />\
+    </span>
+
+*   <img align="left" src="https://img.shields.io/badge/yarn-4DB7FF?style=for-the-badge&logo=yarn&logoColor=white" />\
+    </span>
+
+</br>
 
 ## Installation
 
-```bash
-$ yarn install
+```
+yarn install
+```
+## Setup
+Generate Prisma client:
+```
+prisma generate
+```
+
+Create .env file and set parameters:
+
+```
+DATABASE_URL=
+
+USER_SERVICE_HOST=
+USER_SERVICE_PORT=
+
+EXPIRATION=
+
+JWT_SECRET=
 ```
 
 ## Running the app
 
-```bash
-# development
-$ yarn run start
-
-# watch mode
-$ yarn run start:dev
-
-# production mode
-$ yarn run start:prod
+```
+yarn start
 ```
 
 ## Test
 
-```bash
-# unit tests
-$ yarn run test
-
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
 ```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+yarn test
+```
