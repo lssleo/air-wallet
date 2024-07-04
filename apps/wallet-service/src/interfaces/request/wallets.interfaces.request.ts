@@ -11,7 +11,7 @@ export interface IUpdateBalancesRequest extends IRequest {
 
 export interface ISendTransactionRequest extends IRequest {
     userId: number
-    sendTo: { walletId: number; recipientAddress: string; amount: string; networkName: string }
+    sendParams: { walletId: number; recipientAddress: string; amount: string; networkName: string }
 }
 
 export interface IRemoveWalletRequest extends IRequest {

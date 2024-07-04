@@ -18,7 +18,7 @@ export class ProviderService {
         networks.forEach((network) => {
             const rpcUrl = this.configService.get<string>(`${network.name.toUpperCase()}_RPC_URL`)
             if (!rpcUrl) {
-                throw new Error(`RPC URL not configured for ${network}`)
+                throw new Error(`RPC URL not configured for ${network.name}`)
             }
             this.providers[network.name] = new ethers.JsonRpcProvider(rpcUrl)
         })
