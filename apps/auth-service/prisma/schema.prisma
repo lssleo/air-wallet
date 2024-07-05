@@ -65,7 +65,7 @@ model transaction {
 
 model user {
   id               Int       @id(map: "PK_cace4a159ff9f2512dd42373760") @default(autoincrement())
-  email            String    @unique @db.VarChar
+  email            String    @unique 
   password         String    @db.VarChar
   isVerified       Boolean   @default(false)
   verificationCode String?   @db.VarChar

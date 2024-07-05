@@ -33,7 +33,7 @@ export class UsersService {
         try {
             const salt = await bcrypt.genSalt()
             const hashedPassword = await bcrypt.hash(data.password, salt)
-            const existingUser = await this.prisma.user.findFirst({
+            const existingUser = await this.prisma.user.findUnique({
                 where: { email: data.email },
                 select: { id: true, email: true, isVerified: true },
             })
@@ -95,7 +95,7 @@ export class UsersService {
 
     async verifyEmail(data: IVerifyEmailRequest): Promise<IVerifyEmailResponse> {
         try {
-            const user = await this.prisma.user.findFirst({
+            const user = await this.prisma.user.findUnique({
                 where: { email: data.email },
                 select: { id: true, verificationCode: true },
             })
@@ -124,7 +124,7 @@ export class UsersService {
 
     async validateUser(data: IValidateUserRequest): Promise<IValidateUserResponse> {
         try {
-            const user = await this.prisma.user.findFirst({
+            const user = await this.prisma.user.findUnique({
                 where: { email: data.email },
                 select: { id: true, password: true },
             })
@@ -214,7 +214,7 @@ export class UsersService {
 
     async findByEmail(data: IFindByEmailRequest): Promise<IFindByEmailResponse> {
         try {
-            const user = await this.prisma.user.findFirst({
+            const user = await this.prisma.user.findUnique({
                 where: { id: data.userId, email: data.email },
                 select: { id: true, email: true, isVerified: true },
             })

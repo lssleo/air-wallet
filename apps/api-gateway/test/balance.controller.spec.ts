@@ -81,14 +81,5 @@ describe('BalanceController', () => {
                 Error,
             )
         })
-
-        // it('should throw UnauthorizedException if token is missing', async () => {
-        //     const req = { headers: {} }
-        //     const data: FindWalletsWithCurrencyDto = { currency: 'USDT' }
-
-        //     await expect(balanceController.findForWalletAndCurrency(req, data)).rejects.toThrow(
-        //         UnauthorizedException,
-        //     )
-        // })
     })
 })

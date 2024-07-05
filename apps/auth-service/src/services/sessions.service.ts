@@ -38,7 +38,7 @@ export class SessionsService {
     }
 
     async findActiveSessionById(sessionId: number): Promise<session> {
-        return this.prisma.session.findFirst({
+        return this.prisma.session.findUnique({
             where: {
                 id: sessionId,
                 isActive: true,

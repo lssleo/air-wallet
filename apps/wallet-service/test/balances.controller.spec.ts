@@ -9,6 +9,7 @@ import { of } from 'rxjs'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { ConfigService } from '@nestjs/config'
 import { EventEmitter2 } from '@nestjs/event-emitter'
+import { MemoryService } from 'src/services/memory.service'
 
 describe('BalancesController', () => {
     let controller: BalancesController
@@ -38,6 +39,7 @@ describe('BalancesController', () => {
                 PrismaService,
                 ConfigService,
                 EventEmitter2,
+                MemoryService
             ],
         }).compile()
 

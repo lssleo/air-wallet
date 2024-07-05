@@ -1,9 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
+import { MemoryService } from './memory.service'
 import { ConfigService } from '@nestjs/config'
 import { ethers } from 'ethers'
-import { erc20Abi } from 'src/abi/erc20'
-import { BadRequestException } from '@nestjs/common'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import {
     ICreateWalletRequest,
@@ -30,6 +29,7 @@ export class WalletsService {
         private prisma: PrismaService,
         private readonly configService: ConfigService,
         private eventEmitter: EventEmitter2,
+        private memoryService: MemoryService,
     ) {}
 
     async createWallet(data: ICreateWalletRequest): Promise<ICreateWalletResponse> {
@@ -65,7 +65,7 @@ export class WalletsService {
 
     async updateBalances(data: IUpdateBalancesRequest): Promise<IUpdateBalancesResponse> {
         try {
-            const wallet = await this.prisma.wallet.findFirst({
+            const wallet = await this.prisma.wallet.findUnique({
                 where: { id: data.walletId, userId: data.userId },
             })
 
@@ -73,31 +73,26 @@ export class WalletsService {
                 throw new NotFoundException('Wallet not found or access denied')
             }
 
-            const networks = await this.prisma.network.findMany()
-            const tokens = await this.prisma.token.findMany()
+             const networks = Object.values(this.memoryService.networks)
+             const tokens = Object.values(this.memoryService.tokens)
 
             for (const network of networks) {
-                const rpcUrl = this.configService.get<string>(
-                    `${network.name.toUpperCase()}_RPC_URL`,
-                )
-                const provider = new ethers.JsonRpcProvider(rpcUrl)
-                const balance = await provider.getBalance(wallet.address)
+                const balance = await network.provider.getBalance(wallet.address)
                 await this.updateBalance(
                     wallet.id,
-                    network.id,
-                    network.nativeCurrency,
+                    network.network.id,
+                    network.network.nativeCurrency,
                     ethers.formatEther(balance),
                 )
 
                 for (const token of tokens) {
-                    if (token.network === network.name) {
-                        const erc20Contract = new ethers.Contract(token.address, erc20Abi, provider)
-                        const tokenBalance = await erc20Contract.balanceOf(wallet.address)
+                    if (token.token.network === network.network.name) {
+                        const tokenBalance = await token.contract.balanceOf(wallet.address)
                         await this.updateBalance(
                             wallet.id,
-                            network.id,
-                            token.symbol,
-                            ethers.formatUnits(tokenBalance, token.decimals),
+                            network.network.id,
+                            token.token.symbol,
+                            ethers.formatUnits(tokenBalance, token.token.decimals),
                         )
                     }
                 }
@@ -119,7 +114,7 @@ export class WalletsService {
         data: ISendTransactionRequest,
     ): Promise<ISendTransactionResponse> {
         try {
-            const wallet = await this.prisma.wallet.findFirst({
+            const wallet = await this.prisma.wallet.findUnique({
                 where: { id: data.sendParams.walletId, userId: data.userId },
             })
 
@@ -127,14 +122,8 @@ export class WalletsService {
                 throw new NotFoundException('Wallet not found or access denied')
             }
 
-            const network = await this.prisma.network.findFirst({
-                where: { name: data.sendParams.networkName.toLowerCase() },
-            })
-            if (!network) throw new NotFoundException('Network not found')
-            const rpcUrl = this.configService.get<string>(`${network.name.toUpperCase()}_RPC_URL`)
-            if (!rpcUrl) throw new BadRequestException('RPC URL not configured for this network')
+            const provider = this.memoryService.getProvider(data.sendParams.networkName)
 
-            const provider = new ethers.JsonRpcProvider(rpcUrl)
             const decryptedPrivateKey = this.decryptPrivateKey(wallet.encryptedPrivateKey)
             const walletSigner = new ethers.Wallet(decryptedPrivateKey, provider)
 
@@ -158,7 +147,7 @@ export class WalletsService {
 
     async removeWallet(data: IRemoveWalletRequest): Promise<IRemoveWalletResponse> {
         try {
-            const wallet = await this.prisma.wallet.findFirst({
+            const wallet = await this.prisma.wallet.findUnique({
                 where: { id: data.walletId, userId: data.userId },
             })
 
@@ -184,7 +173,7 @@ export class WalletsService {
         data: IFindWalletByAddressRequest,
     ): Promise<IFindWalletByAddressResponse> {
         try {
-            const wallet = await this.prisma.wallet.findFirst({
+            const wallet = await this.prisma.wallet.findUnique({
                 where: { userId: data.userId, address: data.address },
                 select: {
                     id: true,
