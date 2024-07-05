@@ -8,13 +8,13 @@ AIR WALLET USER-SERVICE
 
 ## Powered with:
 
--   <img align="left" src="https://img.shields.io/badge/Nest-6E2DE1?style=for-the-badge&logo=nestjs&logoColor=white" />\
+*   <img align="left" src="https://img.shields.io/badge/Nest-7835EE?style=for-the-badge&logo=nestjs&logoColor=white" />\
     </span>
 
--   <img align="left" src="https://img.shields.io/badge/PostgreSQL-682BD5?style=for-the-badge&logo=postgresql&logoColor=white" />\
+*   <img align="left" src="https://img.shields.io/badge/PostgreSQL-7130E4?style=for-the-badge&logo=postgresql&logoColor=white" />\
     </span>
 
--   <img align="left" src="https://img.shields.io/badge/TypeScript-6329CB?style=for-the-badge&logo=typescript&logoColor=white" />\
+*   <img align="left" src="https://img.shields.io/badge/RabbitMQ-682BD5?style=for-the-badge&logo=rabbitmq&logoColor=white" />\
     </span>
 
 -   <img align="left" src="https://img.shields.io/badge/Prisma-5C26BE?style=for-the-badge&logo=prisma&logoColor=white" />\
