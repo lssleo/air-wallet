@@ -1,7 +1,5 @@
 import { Controller, UseGuards } from '@nestjs/common'
 import { UsersService } from 'src/services/users.service'
-import { AuthGuard } from 'src/guards/auth.guard'
-import { ApiKeyGuard } from 'src/guards/api-key.guard'
 import { MessagePattern } from '@nestjs/microservices'
 import {
     IFindOneRequest,
@@ -37,19 +35,16 @@ export class UsersController {
         return await this.usersService.verifyEmail(data)
     }
 
-    @UseGuards(ApiKeyGuard)
     @MessagePattern({ cmd: 'delete-user' })
     async remove(data: IDeleteUserRequest): Promise<IDeleteUserResponse> {
         return await this.usersService.remove(data)
     }
 
-    @UseGuards(AuthGuard)
     @MessagePattern({ cmd: 'find-one' })
     async findOne(data: IFindOneRequest): Promise<IFindOneResponse> {
         return await this.usersService.findOne(data)
     }
 
-    @UseGuards(AuthGuard)
     @MessagePattern({ cmd: 'find-by-email' })
     async findByEmail(data: IFindByEmailRequest): Promise<IFindByEmailResponse> {
         return await this.usersService.findByEmail(data)

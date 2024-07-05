@@ -46,11 +46,10 @@ export class WalletController {
     @UseGuards(AuthGuard)
     @Post('createWallet')
     async createWallet(@Req() req: any): Promise<CreateWalletDtoResponse> {
-        const token = req.headers.authorization?.split(' ')[1]
         const response = await firstValueFrom(
             this.walletServiceClient.send<CreateWalletDtoResponse>(
                 { cmd: 'create-wallet' },
-                { token },
+                { userId: req.userId },
             ),
         )
 
@@ -78,11 +77,10 @@ export class WalletController {
         @Req() req: any,
         @Body() data: UpdateBalancesDto,
     ): Promise<UpdateBalancesDtoResponse> {
-        const token = req.headers.authorization?.split(' ')[1]
         const response = await firstValueFrom(
             this.walletServiceClient.send<UpdateBalancesDtoResponse>(
                 { cmd: 'update-balances' },
-                { walletId: data.walletId, token },
+                { walletId: data.walletId, userId: req.userId },
             ),
         )
 
@@ -109,11 +107,10 @@ export class WalletController {
         @Req() req: any,
         @Body() data: SendTransactionDto,
     ): Promise<SendTransactionDtoResponse> {
-        const token = req.headers.authorization?.split(' ')[1]
         const response = await firstValueFrom(
             this.walletServiceClient.send<SendTransactionDtoResponse>(
                 { cmd: 'send-tx-native' },
-                { sendParams: data, token },
+                { sendParams: data, userId: req.userId },
             ),
         )
         if (!response.status) {
@@ -140,11 +137,10 @@ export class WalletController {
         @Req() req: any,
         @Body() data: DeleteWalletDto,
     ): Promise<DeleteWalletDtoResponse> {
-        const token = req.headers.authorization?.split(' ')[1]
         const response = await firstValueFrom(
             this.walletServiceClient.send<DeleteWalletDtoResponse>(
                 { cmd: 'delete-wallet' },
-                { walletId: data.walletId, token },
+                { walletId: data.walletId, userId: req.userId },
             ),
         )
 
@@ -168,11 +164,10 @@ export class WalletController {
     @UseGuards(AuthGuard)
     @Get('getAllWallets')
     async findAllWalletsForUser(@Req() req: any): Promise<FindAllWalletsDtoResponse> {
-        const token = req.headers.authorization?.split(' ')[1]
         const response = await firstValueFrom(
             this.walletServiceClient.send<FindAllWalletsDtoResponse>(
                 { cmd: 'get-all-wallets-for-user' },
-                { token },
+                { userId: req.userId },
             ),
         )
 
@@ -200,11 +195,10 @@ export class WalletController {
         @Req() req: any,
         @Param('address') address: string,
     ): Promise<GetWalletByAddressResponse> {
-        const token = req.headers.authorization?.split(' ')[1]
         const response = await firstValueFrom(
             this.walletServiceClient.send<GetWalletByAddressResponse>(
                 { cmd: 'get-wallet-by-address' },
-                { address: address, token },
+                { address: address, userId: req.userId },
             ),
         )
 

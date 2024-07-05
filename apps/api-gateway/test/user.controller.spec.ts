@@ -4,6 +4,7 @@ import { ClientProxy } from '@nestjs/microservices'
 import { CreateUserDto, VerifyEmailDto, DeleteUserDto } from 'src/dto/user/user.request.dto'
 import { of, throwError } from 'rxjs'
 import { BadRequestException, UnauthorizedException } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 
 describe('UsersController', () => {
     let usersController: UsersController
@@ -13,6 +14,7 @@ describe('UsersController', () => {
         const module: TestingModule = await Test.createTestingModule({
             controllers: [UsersController],
             providers: [
+            ConfigService,
                 {
                     provide: 'AUTH_SERVICE',
                     useValue: {
@@ -234,7 +236,6 @@ describe('UsersController', () => {
             jest.spyOn(clientProxy, 'send').mockImplementation(() => of(response))
 
             const result = await usersController.deleteUser(
-                { headers: { api_key: apiKey } } as any,
                 deleteUserDto,
             )
             expect(result).toEqual({
@@ -252,7 +253,7 @@ describe('UsersController', () => {
             jest.spyOn(clientProxy, 'send').mockImplementation(() => of(response))
 
             await expect(
-                usersController.deleteUser({ headers: { api_key: apiKey } } as any, deleteUserDto),
+                usersController.deleteUser( deleteUserDto),
             ).rejects.toThrow(UnauthorizedException)
         })
 
@@ -265,7 +266,7 @@ describe('UsersController', () => {
             )
 
             await expect(
-                usersController.deleteUser({ headers: { api_key: apiKey } } as any, deleteUserDto),
+                usersController.deleteUser(deleteUserDto),
             ).rejects.toThrow(Error)
         })
     })

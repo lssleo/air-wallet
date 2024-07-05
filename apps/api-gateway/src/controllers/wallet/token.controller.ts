@@ -12,11 +12,12 @@ import {
     UsePipes,
     ValidationPipe,
     NotFoundException,
-    BadRequestException,
+    BadRequestException, UseGuards
 } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
+import { ApiKeyGuard } from 'src/guards/api-key.guard'
 import { firstValueFrom } from 'rxjs'
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger'
+import { ApiTags, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger'
 import { AddTokenDto, UpdateTokenDto } from 'src/dto/wallet/request/token.request.dto'
 import {
     AddTokenDtoResponse,
@@ -36,17 +37,15 @@ export class TokenController {
         description: 'Add new token',
         type: AddTokenDtoResponse,
     })
+    @ApiSecurity('ApiKeyAuth')
+    @UseGuards(ApiKeyGuard)
     @Post('addToken')
     @UsePipes(new ValidationPipe({ transform: true }))
-    async addToken(
-        @Req() req: any,
-        @Body() addTokenDto: AddTokenDto,
-    ): Promise<AddTokenDtoResponse> {
-        const apiKey = req.headers['api_key']
+    async addToken(@Body() addTokenDto: AddTokenDto): Promise<AddTokenDtoResponse> {
         const response = await firstValueFrom(
             this.walletServiceClient.send<AddTokenDtoResponse>(
                 { cmd: 'add-token' },
-                { apiKey, addTokenDto },
+                { addTokenDto },
             ),
         )
 
@@ -67,17 +66,17 @@ export class TokenController {
         description: 'Update token data',
         type: UpdateTokenDtoResponse,
     })
+    @ApiSecurity('ApiKeyAuth')
+    @UseGuards(ApiKeyGuard)
     @Patch('updateToken/:id')
     async updateToken(
-        @Req() req: any,
         @Param('id', ParseIntPipe) id: number,
         @Body() updateTokenDto: UpdateTokenDto,
     ): Promise<UpdateTokenDtoResponse> {
-        const apiKey = req.headers['api_key']
         const response = await firstValueFrom(
             this.walletServiceClient.send<UpdateTokenDtoResponse>(
                 { cmd: 'update-token' },
-                { apiKey, id, updateTokenDto },
+                { id, updateTokenDto },
             ),
         )
 
@@ -98,16 +97,16 @@ export class TokenController {
         description: 'Delete token',
         type: RemoveTokenDtoResponse,
     })
+    @ApiSecurity('ApiKeyAuth')
+    @UseGuards(ApiKeyGuard)
     @Delete('removeToken/:id')
     async removeToken(
-        @Req() req: any,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<RemoveTokenDtoResponse> {
-        const apiKey = req.headers['api_key']
         const response = await firstValueFrom(
             this.walletServiceClient.send<RemoveTokenDtoResponse>(
                 { cmd: 'remove-token' },
-                { apiKey, id },
+                { id },
             ),
         )
 

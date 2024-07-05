@@ -16,15 +16,18 @@ import { ConfigService } from '@nestjs/config'
         ConfigModule.forRoot({
             isGlobal: true,
         }),
-        ClientsModule.registerAsync([ 
+        ClientsModule.registerAsync([
             {
                 name: 'AUTH_SERVICE',
                 imports: [ConfigModule],
                 useFactory: async (configService: ConfigService) => ({
-                    transport: Transport.TCP,
+                    transport: Transport.RMQ,
                     options: {
-                        host: configService.get<string>('AUTH_SERVICE_HOST'),
-                        port: configService.get<number>('AUTH_SERVICE_PORT'),
+                        urls: [configService.get<string>('AUTH_SERVICE_RMQ_URL')],
+                        queue: configService.get<string>('AUTH_SERVICE_RMQ_QUEUE'),
+                        queueOptions: {
+                            durable: true,
+                        },
                     },
                 }),
                 inject: [ConfigService],
@@ -33,10 +36,13 @@ import { ConfigService } from '@nestjs/config'
                 name: 'USER_SERVICE',
                 imports: [ConfigModule],
                 useFactory: async (configService: ConfigService) => ({
-                    transport: Transport.TCP,
+                    transport: Transport.RMQ,
                     options: {
-                        host: configService.get<string>('USER_SERVICE_HOST'),
-                        port: configService.get<number>('USER_SERVICE_PORT'),
+                        urls: [configService.get<string>('USER_SERVICE_RMQ_URL')],
+                        queue: configService.get<string>('USER_SERVICE_RMQ_QUEUE'),
+                        queueOptions: {
+                            durable: true,
+                        },
                     },
                 }),
                 inject: [ConfigService],
@@ -45,10 +51,13 @@ import { ConfigService } from '@nestjs/config'
                 name: 'WALLET_SERVICE',
                 imports: [ConfigModule],
                 useFactory: async (configService: ConfigService) => ({
-                    transport: Transport.TCP,
+                    transport: Transport.RMQ,
                     options: {
-                        host: configService.get<string>('WALLET_SERVICE_HOST'),
-                        port: configService.get<number>('WALLET_SERVICE_PORT'),
+                        urls: [configService.get<string>('WALLET_SERVICE_RMQ_URL')],
+                        queue: configService.get<string>('WALLET_SERVICE_RMQ_QUEUE'),
+                        queueOptions: {
+                            durable: true,
+                        },
                     },
                 }),
                 inject: [ConfigService],
@@ -64,6 +73,6 @@ import { ConfigService } from '@nestjs/config'
         NetworkController,
         TokenController,
     ],
-    providers: [],
+    providers: [ConfigService],
 })
 export class GatewayModule {}

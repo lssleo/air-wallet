@@ -1,6 +1,5 @@
 import { Controller, UseGuards } from '@nestjs/common'
 import { NetworksService } from 'src/services/networks.service'
-// import { ApiKeyGuard } from 'src/guards/api-key.guard'
 import { MessagePattern } from '@nestjs/microservices'
 import {
     ICreateNetworkRequest,

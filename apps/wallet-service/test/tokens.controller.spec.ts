@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { TokensController } from 'src/controllers/tokens.controller'
 import { TokensService } from 'src/services/tokens.service'
-import { ApiKeyGuard } from 'src/guards/api-key.guard'
 import {
     IAddTokenRequest,
     IUpdateTokenRequest,
@@ -36,7 +35,6 @@ describe('TokensController', () => {
             providers: [
             ConfigService,
                 { provide: TokensService, useValue: mockTokensService },
-                { provide: ApiKeyGuard, useValue: mockApiKeyGuard },
             ],
         }).compile()
 

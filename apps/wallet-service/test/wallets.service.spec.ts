@@ -5,7 +5,6 @@ import { ConfigService } from '@nestjs/config'
 import { MemoryService } from 'src/services/memory.service'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { ethers } from 'ethers'
-import { NotFoundException } from '@nestjs/common'
 
 jest.mock('crypto-js', () => ({
     AES: {

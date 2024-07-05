@@ -17,6 +17,7 @@ import {
     FindAllWalletsDtoResponse,
     GetWalletByAddressResponse,
 } from 'src/dto/wallet/response/wallet.response.dto'
+import { ConfigService } from '@nestjs/config'
 
 describe('WalletController', () => {
     let walletController: WalletController
@@ -26,6 +27,7 @@ describe('WalletController', () => {
         const module: TestingModule = await Test.createTestingModule({
             controllers: [WalletController],
             providers: [
+            ConfigService,
                 {
                     provide: 'WALLET_SERVICE',
                     useValue: {
@@ -282,14 +284,14 @@ describe('WalletController', () => {
         })
 
         it('should throw NotFoundException if unauthorized', async () => {
-            const req = { headers: { authorization: 'Bearer invalid_token' } }
+            const req = { headers: { authorization: 'Bearer invalid_token' }, userId: 1 }
             const address: string = '0x0000...000'
 
             jest.spyOn(clientProxy, 'send').mockImplementation(() => of({ status: false }))
 
-            await expect(walletController.findWalletForUserByAddress(req, address)).rejects.toThrow(
-                NotFoundException,
-            )
+            await expect(
+                walletController.findWalletForUserByAddress(req.userId, address),
+            ).rejects.toThrow(NotFoundException)
         })
 
         it('should handle unexpected errors', async () => {

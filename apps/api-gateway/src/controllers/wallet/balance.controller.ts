@@ -34,11 +34,10 @@ export class BalanceController {
         @Req() req: any,
         @Param('currency') currency: string,
     ): Promise<FindWalletsWithCurrencyDtoResponse> {
-        const token = req.headers.authorization?.split(' ')[1]
         const response = await firstValueFrom(
             this.walletServiceClient.send<FindWalletsWithCurrencyDtoResponse>(
                 { cmd: 'wallet-with-currency' },
-                { currency: currency, token },
+                { currency: currency, userId: req.userId },
             ),
         )
 
