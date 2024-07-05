@@ -13,8 +13,8 @@ export class AuthGuard implements CanActivate {
     constructor(@Inject('AUTH_SERVICE') private readonly authServiceClient: ClientProxy) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
-        const request = context.switchToHttp().getRequest()
-        const authHeader = request.headers.authorization
+        const req = context.switchToHttp().getRequest()
+        const authHeader = req.headers.authorization
         if (!authHeader) {
             throw new UnauthorizedException('Authorization header is missing')
         }
@@ -31,8 +31,7 @@ export class AuthGuard implements CanActivate {
         if (!response.status) {
             throw new UnauthorizedException('Unauthorized')
         }
-        request.userId = response.userId
-        request.token = token
+        req.userId = response.userId
         return true
     }
 }

@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { BalancesController } from 'src/controllers/balances.controller'
 import { BalancesService } from 'src/services/balances.service'
 import { WalletsService } from 'src/services/wallets.service'
-import { AuthGuard } from 'src/guards/auth.guard'
 import { IFindWalletWithCurrencyCurrencyRequest } from 'src/interfaces/request/balances.interfaces.request'
 import { IFindWalletWithCurrencyCurrencyResponse } from 'src/interfaces/response/balances.interfaces.response'
 import { of } from 'rxjs'
@@ -29,7 +28,6 @@ describe('BalancesController', () => {
             providers: [
                 { provide: BalancesService, useValue: mockBalancesService },
                 WalletsService,
-                { provide: AuthGuard, useValue: mockAuthGuard },
                 {
                     provide: 'AUTH_SERVICE',
                     useValue: {

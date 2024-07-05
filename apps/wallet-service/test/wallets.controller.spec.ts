@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { WalletsController } from 'src/controllers/wallets.controller'
 import { WalletsService } from 'src/services/wallets.service'
-import { AuthGuard } from 'src/guards/auth.guard'
 import {
     ICreateWalletRequest,
     IUpdateBalancesRequest,
@@ -39,10 +38,7 @@ describe('WalletsController', () => {
                     },
                 },
             ],
-        })
-            .overrideGuard(AuthGuard)
-            .useValue({ canActivate: () => true })
-            .compile()
+        }).compile()
 
         controller = module.get<WalletsController>(WalletsController)
         service = module.get<WalletsService>(WalletsService)

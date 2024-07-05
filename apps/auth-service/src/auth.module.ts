@@ -7,8 +7,8 @@ import { AuthController } from './auth.controller'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { SessionsService } from './services/sessions.service'
 import { ClientsModule, Transport } from '@nestjs/microservices'
-import { PrismaModule } from './prisma/prisma.module';
-import { PrismaService } from './prisma/prisma.service';
+import { PrismaModule } from './prisma/prisma.module'
+import { PrismaService } from './prisma/prisma.service'
 
 @Module({
     imports: [
@@ -29,15 +29,17 @@ import { PrismaService } from './prisma/prisma.service';
                 name: 'USER_SERVICE',
                 imports: [ConfigModule],
                 useFactory: async (configService: ConfigService) => ({
-                    transport: Transport.TCP,
+                    transport: Transport.RMQ,
                     options: {
-                        host: configService.get<string>('USER_SERVICE_HOST'),
-                        port: configService.get<number>('USER_SERVICE_PORT'),
+                        urls: [configService.get<string>('USER_SERVICE_RMQ_URL')],
+                        queue: configService.get<string>('USER_SERVICE_RMQ_QUEUE'),
+                        queueOptions: {
+                            durable: true,
+                        },
                     },
                 }),
                 inject: [ConfigService],
             },
-            ,
         ]),
         PrismaModule,
     ],

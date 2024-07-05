@@ -15,8 +15,9 @@ import {
 } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { firstValueFrom } from 'rxjs'
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger'
 import { AuthGuard } from 'src/guards/auth.guard'
+import { ApiKeyGuard } from 'src/guards/api-key.guard'
 import { CreateUserDto, VerifyEmailDto, DeleteUserDto } from 'src/dto/user/user.request.dto'
 import {
     CreateUserDtoResponse,
@@ -85,18 +86,14 @@ export class UsersController {
         description: 'Delete user',
         type: DeleteUserResponse,
     })
-    @ApiBearerAuth()
-    @UseGuards(AuthGuard)
+    @ApiSecurity('ApiKeyAuth')
+    @UseGuards(ApiKeyGuard)
     @Delete('delete')
-    async deleteUser(
-        @Req() req: any,
-        @Body() deleteUserDto: DeleteUserDto,
-    ): Promise<DeleteUserResponse> {
-        const apiKey = req.headers['api_key']
+    async deleteUser(@Body() deleteUserDto: DeleteUserDto): Promise<DeleteUserResponse> {
         const response = await firstValueFrom(
             this.usersServiceClient.send<DeleteUserResponse>(
                 { cmd: 'delete-user' },
-                { apiKey, deleteUserDto },
+                { deleteUserDto },
             ),
         )
 
@@ -121,9 +118,11 @@ export class UsersController {
     @UseGuards(AuthGuard)
     @Get('user')
     async getUser(@Req() req): Promise<GetUserResponse> {
-        const token = req.headers.authorization?.split(' ')[1]
         const response = await firstValueFrom(
-            this.usersServiceClient.send<GetUserResponse>({ cmd: 'find-one' }, { token }),
+            this.usersServiceClient.send<GetUserResponse>(
+                { cmd: 'find-one' },
+                { userId: req.userId },
+            ),
         )
 
         if (!response.status) {
@@ -154,7 +153,7 @@ export class UsersController {
         const response = await firstValueFrom(
             this.usersServiceClient.send<GetUserByEmailResponse>(
                 { cmd: 'find-by-email' },
-                { token, email },
+                { userId: req.userId, email: email },
             ),
         )
 

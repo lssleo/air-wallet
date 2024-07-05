@@ -10,6 +10,7 @@ import {
     RemoveTokenDtoResponse,
     FindAllTokensDtoResponse,
 } from 'src/dto/wallet/response/token.response.dto'
+import { ConfigService } from '@nestjs/config'
 
 describe('TokenController', () => {
     let tokenController: TokenController
@@ -19,6 +20,7 @@ describe('TokenController', () => {
         const module: TestingModule = await Test.createTestingModule({
             controllers: [TokenController],
             providers: [
+            ConfigService,
                 {
                     provide: 'WALLET_SERVICE',
                     useValue: {
@@ -40,7 +42,6 @@ describe('TokenController', () => {
 
     describe('addToken', () => {
         it('should add token if request is successful', async () => {
-            const req = { headers: { api_key: 'valid_api_key' } }
             const addTokenDto: AddTokenDto = {
                 name: 'Token',
                 symbol: 'TKN',
@@ -62,7 +63,7 @@ describe('TokenController', () => {
 
             jest.spyOn(clientProxy, 'send').mockImplementation(() => of(response))
 
-            const result = await tokenController.addToken(req, addTokenDto)
+            const result = await tokenController.addToken(addTokenDto)
             expect(result).toEqual(response)
         })
 
@@ -79,7 +80,7 @@ describe('TokenController', () => {
 
             jest.spyOn(clientProxy, 'send').mockImplementation(() => of(response))
 
-            await expect(tokenController.addToken(req, addTokenDto)).rejects.toThrow(
+            await expect(tokenController.addToken(addTokenDto)).rejects.toThrow(
                 BadRequestException,
             )
         })
@@ -98,7 +99,7 @@ describe('TokenController', () => {
                 throwError(() => new Error('Unexpected error')),
             )
 
-            await expect(tokenController.addToken(req, addTokenDto)).rejects.toThrow(Error)
+            await expect(tokenController.addToken(addTokenDto)).rejects.toThrow(Error)
         })
     })
 
@@ -126,7 +127,7 @@ describe('TokenController', () => {
 
             jest.spyOn(clientProxy, 'send').mockImplementation(() => of(response))
 
-            const result = await tokenController.updateToken(req, 1, updateTokenDto)
+            const result = await tokenController.updateToken(1, updateTokenDto)
             expect(result).toEqual(response)
         })
 
@@ -143,7 +144,7 @@ describe('TokenController', () => {
 
             jest.spyOn(clientProxy, 'send').mockImplementation(() => of(response))
 
-            await expect(tokenController.updateToken(req, 1, updateTokenDto)).rejects.toThrow(
+            await expect(tokenController.updateToken(1, updateTokenDto)).rejects.toThrow(
                 NotFoundException,
             )
         })
@@ -162,7 +163,7 @@ describe('TokenController', () => {
                 throwError(() => new Error('Unexpected error')),
             )
 
-            await expect(tokenController.updateToken(req, 1, updateTokenDto)).rejects.toThrow(Error)
+            await expect(tokenController.updateToken( 1, updateTokenDto)).rejects.toThrow(Error)
         })
     })
 
@@ -184,7 +185,7 @@ describe('TokenController', () => {
 
             jest.spyOn(clientProxy, 'send').mockImplementation(() => of(response))
 
-            const result = await tokenController.removeToken(req, tokenId)
+            const result = await tokenController.removeToken(tokenId)
             expect(result).toEqual(response)
         })
 
@@ -195,7 +196,7 @@ describe('TokenController', () => {
 
             jest.spyOn(clientProxy, 'send').mockImplementation(() => of(response))
 
-            await expect(tokenController.removeToken(req, tokenId)).rejects.toThrow(
+            await expect(tokenController.removeToken(tokenId)).rejects.toThrow(
                 NotFoundException,
             )
         })
@@ -208,7 +209,7 @@ describe('TokenController', () => {
                 throwError(new Error('Unexpected error')),
             )
 
-            await expect(tokenController.removeToken(req, tokenId)).rejects.toThrow(Error)
+            await expect(tokenController.removeToken(tokenId)).rejects.toThrow(Error)
         })
     })
 
