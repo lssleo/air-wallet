@@ -71,7 +71,7 @@ describe('UsersService', () => {
 
             jest.spyOn(bcrypt, 'genSalt').mockResolvedValue('salt')
             jest.spyOn(bcrypt, 'hash').mockResolvedValue(hash)
-            jest.spyOn(prismaService.user, 'findFirst').mockResolvedValue(null)
+            jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(null)
             jest.spyOn(prismaService.user, 'create').mockResolvedValue(newUser)
 
             const result = await usersService.create(data)
@@ -92,7 +92,7 @@ describe('UsersService', () => {
                 verificationCode: null,
             }
 
-            jest.spyOn(prismaService.user, 'findFirst').mockResolvedValue(existingUser)
+            jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(existingUser)
 
             const result = await usersService.create(data)
             expect(result).toEqual({
@@ -122,7 +122,7 @@ describe('UsersService', () => {
 
             jest.spyOn(bcrypt, 'genSalt').mockResolvedValue('salt')
             jest.spyOn(bcrypt, 'hash').mockResolvedValue(hash)
-            jest.spyOn(prismaService.user, 'findFirst').mockResolvedValue(existingUser)
+            jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(existingUser)
             jest.spyOn(prismaService.user, 'update').mockResolvedValue(updatedUser)
 
             const result = await usersService.create(data)
@@ -133,10 +133,10 @@ describe('UsersService', () => {
             })
         })
 
-        it('should handle errors gracefully', async () => {
+        it('should handle errors with false status', async () => {
             const data: IRegisterRequest = { email: 'test@example.com', password: 'password123' }
 
-            jest.spyOn(prismaService.user, 'findFirst').mockImplementation(() => {
+            jest.spyOn(prismaService.user, 'findUnique').mockImplementation(() => {
                 throw new Error('Database error')
             })
 
@@ -161,7 +161,7 @@ describe('UsersService', () => {
                 verificationCode: '123456',
             }
 
-            jest.spyOn(prismaService.user, 'findFirst').mockResolvedValue(user)
+            jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(user)
             jest.spyOn(prismaService.user, 'update').mockResolvedValue({
                 ...user,
                 isVerified: true,
@@ -185,7 +185,7 @@ describe('UsersService', () => {
                 verificationCode: '123456',
             }
 
-            jest.spyOn(prismaService.user, 'findFirst').mockResolvedValue(user)
+            jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(user)
 
             const result = await usersService.verifyEmail(data)
             expect(result).toEqual({
@@ -197,7 +197,7 @@ describe('UsersService', () => {
         it('should handle user not found', async () => {
             const data: IVerifyEmailRequest = { email: 'test@example.com', code: '123456' }
 
-            jest.spyOn(prismaService.user, 'findFirst').mockResolvedValue(null)
+            jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(null)
 
             const result = await usersService.verifyEmail(data)
             expect(result).toEqual({
@@ -221,7 +221,7 @@ describe('UsersService', () => {
                 verificationCode: null,
             }
 
-            jest.spyOn(prismaService.user, 'findFirst').mockResolvedValue(user)
+            jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(user)
             jest.spyOn(bcrypt, 'compare').mockResolvedValue(true)
 
             const result = await usersService.validateUser(data)
@@ -245,7 +245,7 @@ describe('UsersService', () => {
                 verificationCode: null,
             }
 
-            jest.spyOn(prismaService.user, 'findFirst').mockResolvedValue(user)
+            jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(user)
             jest.spyOn(bcrypt, 'compare').mockResolvedValue(false)
 
             const result = await usersService.validateUser(data)
@@ -255,13 +255,13 @@ describe('UsersService', () => {
             })
         })
 
-        it('should handle errors gracefully', async () => {
+        it('should handle errors with false status', async () => {
             const data: IValidateUserRequest = {
                 email: 'test@example.com',
                 password: 'password123',
             }
 
-            jest.spyOn(prismaService.user, 'findFirst').mockImplementation(() => {
+            jest.spyOn(prismaService.user, 'findUnique').mockImplementation(() => {
                 throw new Error('Database error')
             })
 
@@ -295,7 +295,7 @@ describe('UsersService', () => {
             })
         })
 
-        it('should handle errors gracefully', async () => {
+        it('should handle errors with false status', async () => {
             const data: IDeleteUserRequest = { userId: 1 }
 
             jest.spyOn(prismaService.user, 'delete').mockImplementation(() => {
@@ -345,7 +345,7 @@ describe('UsersService', () => {
             })
         })
 
-        it('should handle errors gracefully', async () => {
+        it('should handle errors with false status', async () => {
             const data: IFindOneRequest = { userId: 1 }
 
             jest.spyOn(prismaService.user, 'findUnique').mockImplementation(() => {
@@ -395,7 +395,7 @@ describe('UsersService', () => {
             })
         })
 
-        it('should handle errors gracefully', async () => {
+        it('should handle errors with false status', async () => {
             const data: ICheckIdRequest = { id: 1 }
 
             jest.spyOn(prismaService.user, 'findUnique').mockImplementation(() => {
@@ -422,7 +422,7 @@ describe('UsersService', () => {
                 verificationCode: null,
             }
 
-            jest.spyOn(prismaService.user, 'findFirst').mockResolvedValue(user)
+            jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(user)
 
             const result = await usersService.findByEmail(data)
             expect(result).toEqual({
@@ -435,7 +435,7 @@ describe('UsersService', () => {
         it('should return not found if user does not exist', async () => {
             const data: IFindByEmailRequest = { userId: 1, email: 'test@example.com' }
 
-            jest.spyOn(prismaService.user, 'findFirst').mockResolvedValue(null)
+            jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(null)
 
             const result = await usersService.findByEmail(data)
             expect(result).toEqual({
@@ -445,10 +445,10 @@ describe('UsersService', () => {
             })
         })
 
-        it('should handle errors', async () => {
+        it('should handle errors with false status', async () => {
             const data: IFindByEmailRequest = { userId: 1, email: 'test@example.com' }
 
-            jest.spyOn(prismaService.user, 'findFirst').mockImplementation(() => {
+            jest.spyOn(prismaService.user, 'findUnique').mockImplementation(() => {
                 throw new Error('Database error')
             })
 

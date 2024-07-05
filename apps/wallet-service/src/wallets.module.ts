@@ -6,7 +6,7 @@ import { TokensService } from './services/tokens.service'
 import { BalancesController } from './controllers/balances.controller'
 import { NetworksController } from './controllers/networks.controller'
 import { NetworksService } from './services/networks.service'
-import { ProviderService } from './services/providers.service'
+import { MemoryService } from './services/memory.service'
 import { TokensController } from './controllers/tokens.controller'
 import { PrismaModule } from './prisma/prisma.module'
 import { PrismaClient } from '@prisma/client'
@@ -43,8 +43,8 @@ import { ClientsModule, Transport } from '@nestjs/microservices'
         TokensService,
         PrismaClient,
         NetworksService,
-        ProviderService,
         TransactionsService,
+        MemoryService,
     ],
     exports: [WalletsService],
     controllers: [WalletsController, BalancesController, NetworksController, TokensController],
@@ -52,8 +52,8 @@ import { ClientsModule, Transport } from '@nestjs/microservices'
 export class WalletModule implements OnModuleInit {
     constructor(
         private readonly transactionsService: TransactionsService,
-        private readonly providersService: ProviderService,
         private readonly prismaSeedService: PrismaSeedService,
+        private readonly memoryService: MemoryService,
     ) {}
 
     async onModuleInit() {
@@ -63,7 +63,7 @@ export class WalletModule implements OnModuleInit {
             console.error('Error seeding networks:', error)
         }
         // console.log('LISTENING BLOCKCHAIN IS OFF in transactions.module.ts')
-        await this.providersService.createProviders()
+        await this.memoryService.initialize()
         await this.transactionsService.initialize()
     }
 }
