@@ -10,16 +10,19 @@ Built with a focus on speed and reliability, this project leverages a microservi
 
 ## Powered with:
 
-*   <img align="left" src="https://img.shields.io/badge/Nest-7835EE?style=for-the-badge&logo=nestjs&logoColor=white" />\
+*   <img align="left" src="https://img.shields.io/badge/Nest-7D3EEC?style=for-the-badge&logo=nestjs&logoColor=white" />\
     </span>
 
-*   <img align="left" src="https://img.shields.io/badge/PostgreSQL-7130E4?style=for-the-badge&logo=postgresql&logoColor=white" />\
+*   <img align="left" src="https://img.shields.io/badge/PostgreSQL-7638E3?style=for-the-badge&logo=postgresql&logoColor=white" />\
     </span>
 
-*   <img align="left" src="https://img.shields.io/badge/RabbitMQ-682BD5?style=for-the-badge&logo=rabbitmq&logoColor=white" />\
+*   <img align="left" src="https://img.shields.io/badge/RabbitMQ-6B2ED7?style=for-the-badge&logo=rabbitmq&logoColor=white" />\
     </span>
 
-*   <img align="left" src="https://img.shields.io/badge/TypeScript-6329CB?style=for-the-badge&logo=typescript&logoColor=white" />\
+*   <img align="left" src="https://img.shields.io/badge/Redis-662BCF?style=for-the-badge&logo=redis&logoColor=white" />\
+    </span>
+
+*   <img align="left" src="https://img.shields.io/badge/TypeScript-6128C7?style=for-the-badge&logo=typescript&logoColor=white" />\
     </span>
 
 *   <img align="left" src="https://img.shields.io/badge/Prisma-5C26BE?style=for-the-badge&logo=prisma&logoColor=white" />\
