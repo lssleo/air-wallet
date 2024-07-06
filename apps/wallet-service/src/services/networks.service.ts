@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
+import { MemoryService } from './memory.service'
 import {
     ICreateNetworkRequest,
     IRemoveNetworkRequest,
@@ -12,7 +13,10 @@ import {
 
 @Injectable()
 export class NetworksService {
-    constructor(private prisma: PrismaService) {}
+    constructor(
+        private prisma: PrismaService,
+        private memoryService: MemoryService,
+    ) {}
 
     async create(data: ICreateNetworkRequest): Promise<ICreateNetworkResponse> {
         try {
@@ -50,11 +54,16 @@ export class NetworksService {
 
     async findAll(): Promise<IFindAllNetworksResponse> {
         try {
-            const networks = await this.prisma.network.findMany()
+            const networks = this.memoryService.getAllNetworks()
             return {
                 status: true,
                 message: 'Networks retrieved successfully',
-                networks: networks,
+                networks: Object.values(networks).map((n) => n.network),
+                // const networks = await this.prisma.network.findMany()
+                // return {
+                //     status: true,
+                //     message: 'Networks retrieved successfully',
+                //     networks: networks,
             }
         } catch (error) {
             return {

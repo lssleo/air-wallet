@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
+import { MemoryService } from './memory.service'
 import {
     IAddTokenRequest,
     IUpdateTokenRequest,
@@ -18,6 +19,7 @@ export class TokensService {
     constructor(
         private prisma: PrismaService,
         private eventEmitter: EventEmitter2,
+        private memoryService: MemoryService,
     ) {}
 
     async addToken(data: IAddTokenRequest): Promise<IAddTokenResponse> {
@@ -99,12 +101,18 @@ export class TokensService {
 
     async findAllTokens(): Promise<IFindAllTokensResponse> {
         try {
-            const tokens = await this.prisma.token.findMany()
+            const tokens = this.memoryService.getAllTokens()
             return {
                 status: true,
                 message: 'Tokens retrieved successfully',
-                tokens: tokens,
+                tokens: Object.values(tokens).map(t => t.token),
             }
+            // const tokens = await this.prisma.token.findMany()
+            // return {
+            //     status: true,
+            //     message: 'Tokens retrieved successfully',
+            //     tokens: tokens,
+            // }
         } catch (error) {
             return {
                 status: false,

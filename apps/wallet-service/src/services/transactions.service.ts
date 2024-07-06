@@ -21,36 +21,6 @@ export class TransactionsService {
         }
     }
 
-    @OnEvent('wallet.added')
-    async handleWalletAdded(wallet: wallet) {
-        this.memoryService.wallets[wallet.address.toLowerCase()] = wallet
-    }
-
-    @OnEvent('wallet.removed')
-    async handleWalletRemoved(wallet: wallet) {
-        delete this.memoryService.wallets[wallet.address.toLowerCase()]
-    }
-
-    @OnEvent('token.added')
-    async handleTokenAdded(token: token) {
-        try {
-            const key = `${token.address.toLowerCase()}_${token.network.toLowerCase()}`
-            const provider = this.memoryService.getProvider(token.network.toLowerCase())
-            this.memoryService.tokens[key] = {
-                token: token,
-                contract: new ethers.Contract(token.address, erc20Abi, provider),
-            }
-        } catch (error) {
-            console.error('Error handling token added event:', error)
-        }
-    }
-
-    @OnEvent('token.removed')
-    async handleTokenRemoved(token: token) {
-        const key = `${token.address.toLowerCase()}_${token.network.toLowerCase()}`
-        delete this.memoryService.tokens[key]
-    }
-
     private async startListening() {
         try {
             const networks = Object.values(this.memoryService.networks)
