@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 import { ClientsModule, Transport } from '@nestjs/microservices'
-import { ConfigModule } from '@nestjs/config'
+import { ConfigService, ConfigModule } from '@nestjs/config'
 import { GatewayController } from './gateway.controller'
 import { AuthController } from './controllers/auth/auth.controller'
 import { UsersController } from './controllers/user/user.controller'
@@ -8,13 +8,30 @@ import { WalletController } from './controllers/wallet/wallet.controller'
 import { BalanceController } from './controllers/wallet/balance.controller'
 import { NetworkController } from './controllers/wallet/network.controller'
 import { TokenController } from './controllers/wallet/token.controller'
-import { AuthGuard } from './guards/auth.guard'
-import { ConfigService } from '@nestjs/config'
+import { CacheModule, CacheInterceptor } from '@nestjs/cache-manager'
+import { APP_INTERCEPTOR } from '@nestjs/core'
+import { redisStore } from 'cache-manager-redis-yet'
+import { RedisClientOptions } from 'redis'
 
 @Module({
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
+        }),
+        CacheModule.registerAsync<RedisClientOptions>({
+            isGlobal: true,
+            imports: [ConfigModule],
+            inject: [ConfigService],
+
+            useFactory: async (configService: ConfigService) => {
+                return {
+                    ttl: configService.get<number>('REDIS_TTL') * 1000, // secs to milisecs
+                    max: configService.get<number>('REDIS_MAX'),
+                    store: redisStore,
+                    host: configService.get<string>('REDIS_HOST'),
+                    port: configService.get<number>('REDIS_PORT'),
+                } as RedisClientOptions
+            },
         }),
         ClientsModule.registerAsync([
             {
@@ -73,6 +90,12 @@ import { ConfigService } from '@nestjs/config'
         NetworkController,
         TokenController,
     ],
-    providers: [ConfigService],
+    providers: [
+        ConfigService,
+        {
+            provide: APP_INTERCEPTOR,
+            useClass: CacheInterceptor,
+        },
+    ],
 })
 export class GatewayModule {}
