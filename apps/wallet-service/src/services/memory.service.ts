@@ -117,4 +117,12 @@ export class MemoryService {
     getProvider(network: string): ethers.JsonRpcProvider {
         return this.networks[network.toLowerCase()].provider
     }
+
+    getAllTokens(): { [key: string]: { token: token } } {
+        return this.tokens
+    }
+
+    getAllNetworks(): { [name: string]: { network: network; provider: ethers.JsonRpcProvider } } {
+        return this.networks
+    }
 }

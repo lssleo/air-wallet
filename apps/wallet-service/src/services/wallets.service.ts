@@ -4,6 +4,7 @@ import { MemoryService } from './memory.service'
 import { ConfigService } from '@nestjs/config'
 import { ethers } from 'ethers'
 import { EventEmitter2 } from '@nestjs/event-emitter'
+import * as crypto from 'crypto-js'
 import {
     ICreateWalletRequest,
     IUpdateBalancesRequest,
@@ -20,8 +21,6 @@ import {
     IFindAllWalletsResponse,
     IFindWalletByAddressResponse,
 } from 'src/interfaces/response/wallets.interfaces.response'
-
-import * as crypto from 'crypto-js'
 
 @Injectable()
 export class WalletsService {

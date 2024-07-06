@@ -12,6 +12,7 @@ describe('MemoryService', () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 MemoryService,
+                ConfigService,
                 {
                     provide: PrismaService,
                     useValue: {
