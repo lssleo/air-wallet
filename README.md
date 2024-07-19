@@ -37,6 +37,9 @@ Built with a focus on speed and reliability, this project leverages a microservi
 *   <img align="left" src="https://img.shields.io/badge/Jest-4D2CAC?style=for-the-badge&logo=jest&logoColor=white" />\
     </span>
 
+*   <img align="left" src="https://img.shields.io/badge/Docker-4D2CAC?style=for-the-badge&logo=docker&logoColor=white" />\
+    </span>
+
 *   <img align="left" src="https://img.shields.io/badge/Ethereum-4D39B9?style=for-the-badge&logo=Ethereum&logoColor=white" />\
     </span>
 

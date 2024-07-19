@@ -1,0 +1,120 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --bind 0.0.0.0
+
+  postgres:
+    image: postgres:alpine
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api-gateway:
+    build:
+      context: ./apps/api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      AUTH_SERVICE_RMQ_URL: ${AUTH_SERVICE_RMQ_URL}
+      AUTH_SERVICE_RMQ_QUEUE: ${AUTH_SERVICE_RMQ_QUEUE}
+      USER_SERVICE_RMQ_URL: ${USER_SERVICE_RMQ_URL}
+      USER_SERVICE_RMQ_QUEUE: ${USER_SERVICE_RMQ_QUEUE}
+      WALLET_SERVICE_RMQ_URL: ${WALLET_SERVICE_RMQ_URL}
+      WALLET_SERVICE_RMQ_QUEUE: ${WALLET_SERVICE_RMQ_QUEUE}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_MAX: ${REDIS_MAX}
+      REDIS_TTL: ${REDIS_TTL}
+      ADMIN_API_KEY: ${ADMIN_API_KEY}
+    depends_on:
+      - rabbitmq
+      - redis
+
+  auth-service:
+    build:
+      context: ./apps/auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      USER_SERVICE_RMQ_URL: ${USER_SERVICE_RMQ_URL}
+      USER_SERVICE_RMQ_QUEUE: ${USER_SERVICE_RMQ_QUEUE}
+      AUTH_SERVICE_RMQ_URL: ${AUTH_SERVICE_RMQ_URL}
+      AUTH_SERVICE_RMQ_QUEUE: ${AUTH_SERVICE_RMQ_QUEUE}
+      EXPIRATION: ${EXPIRATION}
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      - rabbitmq
+      - postgres
+    command: ["sh", "-c", "npx prisma db push && npm run start:dev"]
+
+  user-service:
+    build:
+      context: ./apps/user-service
+      dockerfile: Dockerfile
+    container_name: user-service
+    ports:
+      - "3002:3002"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      USER_SERVICE_RMQ_URL: ${USER_SERVICE_RMQ_URL}
+      USER_SERVICE_RMQ_QUEUE: ${USER_SERVICE_RMQ_QUEUE}
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASS: ${EMAIL_PASS}
+    depends_on:
+      - rabbitmq
+      - postgres
+    command: ["sh", "-c", "npx prisma db push && npm run start:dev"]
+
+  wallet-service:
+    build:
+      context: ./apps/wallet-service
+      dockerfile: Dockerfile
+    container_name: wallet-service
+    ports:
+      - "3003:3003"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      WALLET_SERVICE_RMQ_URL: ${WALLET_SERVICE_RMQ_URL}
+      WALLET_SERVICE_RMQ_QUEUE: ${WALLET_SERVICE_RMQ_QUEUE}
+      ETHEREUM_RPC_URL: ${ETHEREUM_RPC_URL}
+      POLYGON_RPC_URL: ${POLYGON_RPC_URL}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+    depends_on:
+      - rabbitmq
+      - postgres
+    command: ["sh", "-c", "npx prisma db push && npm run start:dev"]
+
+volumes:
+  rabbitmq_data:
+  redis_data:
+  postgres_data:
