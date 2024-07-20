@@ -72,7 +72,56 @@ Built with a focus on speed and reliability, this project leverages a microservi
 
 </br>
 
-## Run:
+## Setup
+
+Create .env file and set parameters
+
+```
+RABBITMQ_DEFAULT_USER=
+RABBITMQ_DEFAULT_PASS=
+
+POSTGRES_USER=
+POSTGRES_PASSWORD=
+POSTGRES_DB=
+
+AUTH_SERVICE_RMQ_URL=
+AUTH_SERVICE_RMQ_QUEUE=
+
+USER_SERVICE_RMQ_URL=
+USER_SERVICE_RMQ_QUEUE=
+
+WALLET_SERVICE_RMQ_URL=
+WALLET_SERVICE_RMQ_QUEUE=
+
+REDIS_URL=
+REDIS_MAX=
+REDIS_TTL=
+
+ADMIN_API_KEY=
+
+DATABASE_URL=
+
+EXPIRATION=
+
+JWT_SECRET=
+
+EMAIL_USER=
+EMAIL_PASS=
+
+ETHEREUM_RPC_URL=
+POLYGON_RPC_URL=
+
+ENCRYPTION_KEY=
+
+```
+
+## Run
+
+```
+docker compose up --build
+```
+
+## Apps:
 
 -   [API-GATEWAY](apps/api-gateway/README.md)
 -   [AUTH-SERVICE](apps/auth-service/README.md)

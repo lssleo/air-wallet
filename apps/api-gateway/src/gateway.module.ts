@@ -24,12 +24,12 @@ import { RedisClientOptions } from 'redis'
             inject: [ConfigService],
 
             useFactory: async (configService: ConfigService) => {
+                console.log(configService.get<string>('REDIS_HOST'))
                 return {
                     ttl: configService.get<number>('REDIS_TTL') * 1000, // secs to milisecs
                     max: configService.get<number>('REDIS_MAX'),
                     store: redisStore,
-                    host: configService.get<string>('REDIS_HOST'),
-                    port: configService.get<number>('REDIS_PORT'),
+                    url: configService.get<string>('REDIS_URL'),
                 } as RedisClientOptions
             },
         }),
